@@ -6,6 +6,7 @@ var autoprefixer = require('autoprefixer');
 module.exports = {
     entry: './Tooltip.jsx',
     output: {
+        libraryTarget: 'umd',
         path: path.resolve(__dirname, './dist'),
         filename: 'Tooltip.js'
     },
@@ -15,7 +16,7 @@ module.exports = {
     ],
     module: {
         loaders: [
-            {test: /\.jsx$/, loader: 'babel-loader', query: {presets: ['react']}},
+            {test: /\.jsx$/, loader: 'babel-loader', query: {presets: ['es2015', 'react']}},
             {test: /\.css$/, loader: 'style!css?localIdentName=[name]__[local]___[hash:base64:5]!postcss'}
         ]
     },

@@ -93,7 +93,7 @@ class Tooltip extends React.Component {
             triangleSize,
             rootPosition
         } = this.props;
-        let position = getInitialTooltipPosition(elementRect, triangleSize, tooltipDirection);
+        const position = getInitialTooltipPosition(elementRect, triangleSize, tooltipDirection);
         const determineThresholds = {
             top: () => rootPosition.y - Math.abs(position.top),
             bottom: () => window.innerHeight - (rootPosition.y + Math.abs(position.top) + elementRect.height)

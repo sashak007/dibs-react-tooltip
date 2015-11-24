@@ -1,4 +1,14 @@
-/******/ (function(modules) { // webpackBootstrap
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory(require("react"), require("classnames"));
+	else if(typeof define === 'function' && define.amd)
+		define(["react", "classnames"], factory);
+	else {
+		var a = typeof exports === 'object' ? factory(require("react"), require("classnames")) : factory(root["react"], root["classnames"]);
+		for(var i in a) (typeof exports === 'object' ? exports : root)[i] = a[i];
+	}
+})(this, function(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_6__) {
+return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 
@@ -48,18 +58,26 @@
 
 	'use strict';
 
-	const React = __webpack_require__(1);
-	const styles = __webpack_require__(2);
-	const classNames = __webpack_require__(6);
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-	const trianglePaths = {
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var React = __webpack_require__(1);
+	var styles = __webpack_require__(2);
+	var classNames = __webpack_require__(6);
+
+	var trianglePaths = {
 	    top: 'm0,0 h10 l-5,10z',
 	    left: '',
 	    bottom: 'm0,10 h10 l-5,-10z',
 	    right: ''
 	};
 
-	const oppositeDirections = {
+	var oppositeDirections = {
 	    top: 'bottom',
 	    bottom: 'top',
 	    left: 'right',
@@ -67,8 +85,8 @@
 	};
 
 	function getInitialTooltipPosition(elementRect, triangleSize, tooltipDirection) {
-	    const topPadding = 10;
-	    const positions = {
+	    var topPadding = 10;
+	    var positions = {
 	        top: {
 	            top: -1 * elementRect.height - triangleSize,
 	            left: -1 * (elementRect.width / 2),
@@ -85,11 +103,15 @@
 	    return positions[tooltipDirection];
 	}
 
-	class Tooltip extends React.Component {
-	    constructor(props) {
-	        super(props);
+	var Tooltip = (function (_React$Component) {
+	    _inherits(Tooltip, _React$Component);
 
-	        this.state = {
+	    function Tooltip(props) {
+	        _classCallCheck(this, Tooltip);
+
+	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Tooltip).call(this, props));
+
+	        _this.state = {
 	            top: 0,
 	            left: 0,
 	            moved: false,
@@ -97,154 +119,176 @@
 	            flippedFrom: null
 	        };
 
-	        this._el = null;
+	        _this._el = null;
+	        return _this;
 	    }
 
-	    componentDidMount() {
-	        this._el = this.refs.tooltip;
-	    }
-
-	    componentWillReceiveProps(nextProps) {
-	        this.setState({
-	            tooltipDirection: nextProps.tooltipDirection || this.state.tooltipDirection
-	        });
-	    }
-
-	    componentDidUpdate() {
-	        if (this.props.isVisible && !this.state.moved) {
-	            if (this._el && this._el.childNodes.length) {
-	                // childNodes[0] is the contents of the tooltip, it's not present until the first time the component is shown so we can't do in componentDidMount
-	                const rect = this._el.childNodes[0].getBoundingClientRect();
-	                this._adjustPosition(rect);
-	            }
-	        } else if (!this.props.isVisible && this.state.moved) {
-	            // make sure the position gets adjusted next time the tooltip is opened
+	    _createClass(Tooltip, [{
+	        key: 'componentDidMount',
+	        value: function componentDidMount() {
+	            this._el = this.refs.tooltip;
+	        }
+	    }, {
+	        key: 'componentWillReceiveProps',
+	        value: function componentWillReceiveProps(nextProps) {
 	            this.setState({
-	                moved: false,
-	                flippedFrom: null
+	                tooltipDirection: nextProps.tooltipDirection || this.state.tooltipDirection
 	            });
 	        }
-	    }
-
-	    /**
-	     * Adjusts the position of the tooltip element so that it's centered if possible. If it can't be centered because
-	     * it would go offscreen, then offset the position so the whole tooltip is still displayed onscreen.
-	     * @param  {Object} elementRect A rectangle indicating the dimensions of the tooltip element
-	     */
-	    _adjustPosition(elementRect) {
-	        const { tooltipDirection } = this.state;
-	        const {
-	            positionThresholds: thresholds,
-	            triangleSize,
-	            rootPosition
-	        } = this.props;
-	        let position = getInitialTooltipPosition(elementRect, triangleSize, tooltipDirection);
-	        const determineThresholds = {
-	            top: () => rootPosition.y - Math.abs(position.top),
-	            bottom: () => window.innerHeight - (rootPosition.y + Math.abs(position.top) + elementRect.height)
-	        };
-
-	        const adjustHorizontal = () => {
-	            const overflowLeft = rootPosition.x - Math.abs(position.left);
-	            if (overflowLeft < thresholds.left) {
-
-	                position.left -= overflowLeft - thresholds.left;
-	                this.props.onThresholdPassed();
+	    }, {
+	        key: 'componentDidUpdate',
+	        value: function componentDidUpdate() {
+	            if (this.props.isVisible && !this.state.moved) {
+	                if (this._el && this._el.childNodes.length) {
+	                    // childNodes[0] is the contents of the tooltip, it's not present until the first time the component is shown so we can't do in componentDidMount
+	                    var rect = this._el.childNodes[0].getBoundingClientRect();
+	                    this._adjustPosition(rect);
+	                }
+	            } else if (!this.props.isVisible && this.state.moved) {
+	                // make sure the position gets adjusted next time the tooltip is opened
+	                this.setState({
+	                    moved: false,
+	                    flippedFrom: null
+	                });
 	            }
-	        };
-	        const changeDirection = direction => {
-	            const oldState = this.state.tooltipDirection;
-	            this.setState({
-	                tooltipDirection: direction,
-	                moved: false,
-	                flippedFrom: oldState
-	            });
-	            this.props.onThresholdPassed();
-	        };
+	        }
 
-	        /*
-	            This has the effect that if the tooltip doesn't fit on both the top and the bottom, we default to
-	            displaying it on the top as per the spec
+	        /**
+	         * Adjusts the position of the tooltip element so that it's centered if possible. If it can't be centered because
+	         * it would go offscreen, then offset the position so the whole tooltip is still displayed onscreen.
+	         * @param  {Object} elementRect A rectangle indicating the dimensions of the tooltip element
 	         */
-	        const canFlip = () => {
-	            // if the previous tooltip direction was 'top' (i.e. it's on the bottom now), we can still flip back to the top
-	            return !this.state.flippedFrom || this.state.flippedFrom === 'top';
-	        };
 
-	        const changeDirectionIfNecessary = (changed, direction) => {
-	            if (!changed && canFlip() && tooltipDirection === direction) {
-	                const overflow = determineThresholds[direction]();
-	                if (overflow < thresholds[direction]) {
-	                    changeDirection(oppositeDirections[direction]);
-	                    changed = true;
+	    }, {
+	        key: '_adjustPosition',
+	        value: function _adjustPosition(elementRect) {
+	            var _this2 = this;
+
+	            var tooltipDirection = this.state.tooltipDirection;
+	            var _props = this.props;
+	            var thresholds = _props.positionThresholds;
+	            var triangleSize = _props.triangleSize;
+	            var rootPosition = _props.rootPosition;
+
+	            var position = getInitialTooltipPosition(elementRect, triangleSize, tooltipDirection);
+	            var determineThresholds = {
+	                top: function top() {
+	                    return rootPosition.y - Math.abs(position.top);
+	                },
+	                bottom: function bottom() {
+	                    return window.innerHeight - (rootPosition.y + Math.abs(position.top) + elementRect.height);
+	                }
+	            };
+
+	            var adjustHorizontal = function adjustHorizontal() {
+	                var overflowLeft = rootPosition.x - Math.abs(position.left);
+	                if (overflowLeft < thresholds.left) {
+
+	                    position.left -= overflowLeft - thresholds.left;
+	                    _this2.props.onThresholdPassed();
+	                }
+	            };
+	            var changeDirection = function changeDirection(direction) {
+	                var oldState = _this2.state.tooltipDirection;
+	                _this2.setState({
+	                    tooltipDirection: direction,
+	                    moved: false,
+	                    flippedFrom: oldState
+	                });
+	                _this2.props.onThresholdPassed();
+	            };
+
+	            /*
+	                This has the effect that if the tooltip doesn't fit on both the top and the bottom, we default to
+	                displaying it on the top as per the spec
+	             */
+	            var canFlip = function canFlip() {
+	                // if the previous tooltip direction was 'top' (i.e. it's on the bottom now), we can still flip back to the top
+	                return !_this2.state.flippedFrom || _this2.state.flippedFrom === 'top';
+	            };
+
+	            var changeDirectionIfNecessary = function changeDirectionIfNecessary(changed, direction) {
+	                if (!changed && canFlip() && tooltipDirection === direction) {
+	                    var overflow = determineThresholds[direction]();
+	                    if (overflow < thresholds[direction]) {
+	                        changeDirection(oppositeDirections[direction]);
+	                        changed = true;
+	                    }
+	                }
+	                return changed;
+	            };
+
+	            var verticalOrientations = ['top', 'bottom'];
+
+	            /*
+	                If the tooltip is displayed on the top or bottom, adjust the horizontal position so it's all displayed inside
+	                the window and flip it from top->bottom or vice-versa if necessary
+	             */
+	            if (verticalOrientations.indexOf(tooltipDirection) >= 0) {
+	                adjustHorizontal();
+	                if (verticalOrientations.reduce(changeDirectionIfNecessary, false)) {
+	                    return;
 	                }
 	            }
-	            return changed;
-	        };
 
-	        const verticalOrientations = ['top', 'bottom'];
-
-	        /*
-	            If the tooltip is displayed on the top or bottom, adjust the horizontal position so it's all displayed inside
-	            the window and flip it from top->bottom or vice-versa if necessary
-	         */
-	        if (verticalOrientations.indexOf(tooltipDirection) >= 0) {
-	            adjustHorizontal();
-	            if (verticalOrientations.reduce(changeDirectionIfNecessary, false)) {
-	                return;
-	            }
+	            this.setState(Object.assign({
+	                moved: true
+	            }, position));
 	        }
 
-	        this.setState(Object.assign({
-	            moved: true
-	        }, position));
-	    }
+	        /**
+	         * Renders the tooltip contents if this.props.isVisible is true
+	         * @param  {Object} style         The style of the tooltip container
+	         * @param  {Object} triangleStyle The style of the svg triangle
+	         */
 
-	    /**
-	     * Renders the tooltip contents if this.props.isVisible is true
-	     * @param  {Object} style         The style of the tooltip container
-	     * @param  {Object} triangleStyle The style of the svg triangle
-	     */
-	    _renderContents(style, triangleStyle) {
-	        const { tooltipDirection } = this.state;
-	        const tooltipClass = styles[tooltipDirection];
-	        const path = trianglePaths[tooltipDirection];
-	        const tooltipInnerClass = classNames(styles.inner, this.props.containerClass);
-	        const triangleClass = classNames(styles.triangle, this.props.triangleClass);
+	    }, {
+	        key: '_renderContents',
+	        value: function _renderContents(style, triangleStyle) {
+	            var tooltipDirection = this.state.tooltipDirection;
 
-	        return React.createElement(
-	            'div',
-	            { className: tooltipClass, style: style, onClick: this.props.onClick },
-	            React.createElement(
+	            var tooltipClass = styles[tooltipDirection];
+	            var path = trianglePaths[tooltipDirection];
+	            var tooltipInnerClass = classNames(styles.inner, this.props.containerClass);
+	            var triangleClass = classNames(styles.triangle, this.props.triangleClass);
+
+	            return React.createElement(
 	                'div',
-	                { className: tooltipInnerClass },
-	                this.props.children
-	            ),
-	            React.createElement(
-	                'svg',
-	                { className: triangleClass, style: triangleStyle, width: '10', height: '10' },
-	                React.createElement('path', { d: path })
-	            )
-	        );
-	    }
+	                { className: tooltipClass, style: style, onClick: this.props.onClick },
+	                React.createElement(
+	                    'div',
+	                    { className: tooltipInnerClass },
+	                    this.props.children
+	                ),
+	                React.createElement(
+	                    'svg',
+	                    { className: triangleClass, style: triangleStyle, width: '10', height: '10' },
+	                    React.createElement('path', { d: path })
+	                )
+	            );
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            var style = {
+	                top: this.state.top,
+	                left: this.state.left
+	            };
+	            var triangleStyle = {
+	                top: this.state.triangleTop,
+	                left: Math.abs(style.left)
+	            };
 
-	    render() {
-	        const style = {
-	            top: this.state.top,
-	            left: this.state.left
-	        };
-	        const triangleStyle = {
-	            top: this.state.triangleTop,
-	            left: Math.abs(style.left)
-	        };
+	            return React.createElement(
+	                'div',
+	                { ref: 'tooltip' },
+	                this.props.isVisible ? this._renderContents(style, triangleStyle) : null
+	            );
+	        }
+	    }]);
 
-	        return React.createElement(
-	            'div',
-	            { ref: 'tooltip' },
-	            this.props.isVisible ? this._renderContents(style, triangleStyle) : null
-	        );
-	    }
-	}
+	    return Tooltip;
+	})(React.Component);
 
 	Tooltip.propTypes = {
 	    children: React.PropTypes.node,
@@ -278,8 +322,8 @@
 	        left: 10,
 	        right: 10
 	    },
-	    onClick: () => {},
-	    onThresholdPassed: () => {}
+	    onClick: function onClick() {},
+	    onThresholdPassed: function onThresholdPassed() {}
 	};
 
 	module.exports = Tooltip;
@@ -288,7 +332,7 @@
 /* 1 */
 /***/ function(module, exports) {
 
-	module.exports = react;
+	module.exports = __WEBPACK_EXTERNAL_MODULE_1__;
 
 /***/ },
 /* 2 */
@@ -653,7 +697,9 @@
 /* 6 */
 /***/ function(module, exports) {
 
-	module.exports = classnames;
+	module.exports = __WEBPACK_EXTERNAL_MODULE_6__;
 
 /***/ }
-/******/ ]);
+/******/ ])
+});
+;
