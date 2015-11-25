@@ -22,5 +22,6 @@ module.exports = {
     },
     postcss: [
         autoprefixer({autoprefixer: undefined})
-    ]
+    ],
+    devtool: 'source-map'
 };
