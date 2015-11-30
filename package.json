@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jrdrg/dibs-react-tooltip.git"
+    "url": "git+https://github.com/1stdibs/dibs-react-tooltip.git"
   },
   "keywords": [
     "tooltip",
@@ -17,9 +17,9 @@
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jrdrg/dibs-react-tooltip/issues"
+    "url": "https://github.com/1stdibs/dibs-react-tooltip/issues"
   },
-  "homepage": "https://github.com/jrdrg/dibs-react-tooltip#readme",
+  "homepage": "https://github.com/1stdibs/dibs-react-tooltip#readme",
   "devDependencies": {
     "autoprefixer": "^6.1.1",
     "babel-core": "^6.2.1",
