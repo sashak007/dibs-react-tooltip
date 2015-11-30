@@ -1,0 +1,52 @@
+/* styles for tooltip*/
+
+:local(.hasShadow) {
+    filter: drop-shadow(3px 3px 4px #999);
+}
+:local(.defaultStyle) {
+    background-color: #D8E5F2;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    padding: 15px;
+    line-height: 1.4;
+    width: 250px;
+    span ~ ul {
+        margin-top: 15px;
+    }
+    ul {
+        margin-bottom: 0;
+        /*
+        make sure the bullet points of lists are more or less aligned with the left margin of the container minus 15px padding
+        */
+        padding-left: 1.2em;
+        li {
+            margin-bottom: 10px;
+        }
+        li:last-child {
+            margin-bottom: 0;
+        }
+    }
+}
+:local(.defaultTriangle) {
+    fill: #D8E5F2;
+}
+:local(.triangle) {
+    position: absolute;
+}
+:local(.container) {
+    composes: hasShadow;
+    display: block;
+    cursor: default;
+    position: absolute;
+    z-index: 1000;
+}
+:local(.inner) {
+    position: relative;
+}
+:local(.top) {
+    composes: container;
+}
+:local(.bottom) {
+    composes: container;
+}
+
