@@ -94,16 +94,25 @@ class Tooltip extends React.Component {
             rootPosition
         } = this.props;
         const position = getInitialTooltipPosition(elementRect, triangleSize, tooltipDirection);
+
+        // determine the area against which we are going to check the thresholds
+        const bounds = this.props.getBounds();
         const determineThresholds = {
-            top: () => rootPosition.y - Math.abs(position.top),
-            bottom: () => window.innerHeight - (rootPosition.y + Math.abs(position.top) + elementRect.height)
+            top: () => rootPosition.y - Math.abs(position.top) - bounds.top,
+            bottom: () => bounds.bottom - (rootPosition.y + Math.abs(position.top) + elementRect.height)
         };
 
         const adjustHorizontal = () => {
-            const overflowLeft = rootPosition.x - Math.abs(position.left);
-            if (overflowLeft < thresholds.left) {
+            const overflowLeft = (rootPosition.x + position.left) - bounds.left;
+            const overflowRight = bounds.right - (rootPosition.x + (position.left + elementRect.width));
 
+            if (overflowLeft < thresholds.left) {
                 position.left -= (overflowLeft - thresholds.left);
+                this.props.onThresholdPassed();
+            }
+
+            if (overflowRight < thresholds.right) {
+                position.left += (overflowRight - thresholds.right);
                 this.props.onThresholdPassed();
             }
         };
@@ -197,6 +206,15 @@ class Tooltip extends React.Component {
     }
 }
 
+function getWindowBounds() {
+    return {
+        top: 0,
+        left: 0,
+        right: window.innerWidth,
+        bottom: window.innerHeight
+    };
+}
+
 Tooltip.propTypes = {
     children: React.PropTypes.node,
     tooltipDirection: React.PropTypes.oneOf(['top', 'bottom']),     // TODO: add left and right if necessary
@@ -215,7 +233,8 @@ Tooltip.propTypes = {
         y: React.PropTypes.number
     }).isRequired,
     onClick: React.PropTypes.func,
-    onThresholdPassed: React.PropTypes.func
+    onThresholdPassed: React.PropTypes.func,
+    getBounds: React.PropTypes.func
 };
 
 Tooltip.defaultProps = {
@@ -230,7 +249,8 @@ Tooltip.defaultProps = {
         right: 10
     },
     onClick: () => {},
-    onThresholdPassed: () => {}
+    onThresholdPassed: () => {},
+    getBounds: getWindowBounds
 };
 
 module.exports = Tooltip;
