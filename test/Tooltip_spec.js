@@ -71,7 +71,8 @@ describe('Tooltip', () => {
                     x: 20,
                     y: 20
                 },
-                onThresholdPassed: () => {}
+                onThresholdPassed: () => {},
+                getBounds: () => ({top:0, left: 0, right: 500, bottom: 500})
             }, props);
         });
 
