@@ -171,20 +171,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var rootPosition = _props.rootPosition;
 	
 	            var position = getInitialTooltipPosition(elementRect, triangleSize, tooltipDirection);
+	
+	            // determine the area against which we are going to check the thresholds
+	            var bounds = this.props.getBounds();
 	            var determineThresholds = {
 	                top: function top() {
-	                    return rootPosition.y - Math.abs(position.top);
+	                    return rootPosition.y - Math.abs(position.top) - bounds.top;
 	                },
 	                bottom: function bottom() {
-	                    return window.innerHeight - (rootPosition.y + Math.abs(position.top) + elementRect.height);
+	                    return bounds.bottom - (rootPosition.y + Math.abs(position.top) + elementRect.height);
 	                }
 	            };
 	
 	            var adjustHorizontal = function adjustHorizontal() {
-	                var overflowLeft = rootPosition.x - Math.abs(position.left);
-	                if (overflowLeft < thresholds.left) {
+	                var overflowLeft = rootPosition.x + position.left - bounds.left;
+	                var overflowRight = bounds.right - (rootPosition.x + (position.left + elementRect.width));
 	
+	                if (overflowLeft < thresholds.left) {
 	                    position.left -= overflowLeft - thresholds.left;
+	                    _this2.props.onThresholdPassed();
+	                }
+	
+	                if (overflowRight < thresholds.right) {
+	                    position.left += overflowRight - thresholds.right;
 	                    _this2.props.onThresholdPassed();
 	                }
 	            };
@@ -290,6 +299,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return Tooltip;
 	})(React.Component);
 	
+	function getWindowBounds() {
+	    return {
+	        top: 0,
+	        left: 0,
+	        right: window.innerWidth,
+	        bottom: window.innerHeight
+	    };
+	}
+	
 	Tooltip.propTypes = {
 	    children: React.PropTypes.node,
 	    tooltipDirection: React.PropTypes.oneOf(['top', 'bottom']), // TODO: add left and right if necessary
@@ -308,7 +326,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        y: React.PropTypes.number
 	    }).isRequired,
 	    onClick: React.PropTypes.func,
-	    onThresholdPassed: React.PropTypes.func
+	    onThresholdPassed: React.PropTypes.func,
+	    getBounds: React.PropTypes.func
 	};
 	
 	Tooltip.defaultProps = {
@@ -323,7 +342,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        right: 10
 	    },
 	    onClick: function onClick() {},
-	    onThresholdPassed: function onThresholdPassed() {}
+	    onThresholdPassed: function onThresholdPassed() {},
+	    getBounds: getWindowBounds
 	};
 	
 	module.exports = Tooltip;
