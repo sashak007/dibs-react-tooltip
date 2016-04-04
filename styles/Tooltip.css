@@ -1,52 +1,68 @@
 /* styles for tooltip*/
 
-:local(.hasShadow) {
-    filter: drop-shadow(3px 3px 4px #999);
-}
 :local(.defaultStyle) {
-    background-color: #D8E5F2;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-size: 13px;
-    padding: 15px;
-    line-height: 1.4;
     width: 250px;
-    span ~ ul {
-        margin-top: 15px;
-    }
-    ul {
-        margin-bottom: 0;
-        /*
-        make sure the bullet points of lists are more or less aligned with the left margin of the container minus 15px padding
-        */
-        padding-left: 1.2em;
-        li {
-            margin-bottom: 10px;
-        }
-        li:last-child {
-            margin-bottom: 0;
-        }
-    }
+    padding: 15px;
+    font-size: 13px;
+    line-height: 1.4;
+    text-align: left;
+    background: #fff;
 }
+
+:local(.defaultClose) {
+    fill: #000;
+}
+
 :local(.defaultTriangle) {
-    fill: #D8E5F2;
+    fill: #fff;
 }
-:local(.triangle) {
-    position: absolute;
-}
+
 :local(.container) {
-    composes: hasShadow;
+    filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.3));
     display: block;
-    cursor: default;
     position: absolute;
     z-index: 1000;
+    cursor: default;
 }
+
 :local(.inner) {
     position: relative;
 }
-:local(.top) {
-    composes: container;
-}
-:local(.bottom) {
-    composes: container;
+
+:local(.svg) {
+    max-height: 100%;
+    max-width: 100%;
+    height: auto;
+    width: auto;
 }
 
+:local(.close) {
+    composes: svg;
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    width: 10px;
+    height: 10px;
+    cursor: pointer;
+}
+
+:local(.close:hover) {
+    opacity: 0.9;
+}
+
+:local(.triangle) {
+    composes: svg;
+    position: absolute;
+}
+
+:local(.top .triangle) {
+    transform: rotate(180deg);
+}
+
+:local(.left .triangle) {
+    transform: rotate(90deg);
+}
+
+:local(.right .triangle) {
+    transform: rotate(-90deg);
+}

@@ -7,7 +7,7 @@
 		var a = typeof exports === 'object' ? factory(require("react"), require("classnames")) : factory(root["react"], root["classnames"]);
 		for(var i in a) (typeof exports === 'object' ? exports : root)[i] = a[i];
 	}
-})(this, function(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_6__) {
+})(this, function(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_2__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -69,15 +69,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
 	var React = __webpack_require__(1);
-	var styles = __webpack_require__(2);
-	var classNames = __webpack_require__(6);
-	
-	var trianglePaths = {
-	    top: 'm0,0 h10 l-5,10z',
-	    left: '',
-	    bottom: 'm0,10 h10 l-5,-10z',
-	    right: ''
-	};
+	var classNames = __webpack_require__(2);
+	var styles = __webpack_require__(3);
 	
 	var oppositeDirections = {
 	    top: 'bottom',
@@ -85,25 +78,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    left: 'right',
 	    right: 'left'
 	};
-	
-	function getInitialTooltipPosition(elementRect, triangleSize, tooltipDirection) {
-	    var topPadding = 10;
-	    var positions = {
-	        top: {
-	            top: -1 * elementRect.height - triangleSize,
-	            left: -1 * (elementRect.width / 2),
-	            triangleTop: elementRect.height
-	        },
-	        bottom: {
-	            top: topPadding + triangleSize * 2,
-	            left: -1 * (elementRect.width / 2),
-	            triangleTop: -1 * triangleSize
-	        },
-	        left: {},
-	        right: {}
-	    };
-	    return positions[tooltipDirection];
-	}
 	
 	var Tooltip = function (_React$Component) {
 	    _inherits(Tooltip, _React$Component);
@@ -117,8 +91,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            top: 0,
 	            left: 0,
 	            moved: false,
+	            flippedFrom: null,
 	            tooltipDirection: props.tooltipDirection,
-	            flippedFrom: null
+	            isVisible: props.isVisible
 	        };
 	
 	        _this._el = null;
@@ -134,25 +109,74 @@ return /******/ (function(modules) { // webpackBootstrap
 	        key: 'componentWillReceiveProps',
 	        value: function componentWillReceiveProps(nextProps) {
 	            this.setState({
-	                tooltipDirection: nextProps.tooltipDirection || this.state.tooltipDirection
+	                tooltipDirection: nextProps.tooltipDirection || this.state.tooltipDirection,
+	                isVisible: nextProps.isVisible
 	            });
 	        }
 	    }, {
 	        key: 'componentDidUpdate',
 	        value: function componentDidUpdate() {
-	            if (this.props.isVisible && !this.state.moved) {
+	            if (this.state.isVisible && !this.state.moved) {
 	                if (this._el && this._el.childNodes.length) {
 	                    // childNodes[0] is the contents of the tooltip, it's not present until the first time the component is shown so we can't do in componentDidMount
 	                    var rect = this._el.childNodes[0].getBoundingClientRect();
 	                    this._adjustPosition(rect);
 	                }
-	            } else if (!this.props.isVisible && this.state.moved) {
+	            } else if (!this.state.isVisible && this.state.moved) {
 	                // make sure the position gets adjusted next time the tooltip is opened
 	                this.setState({
 	                    moved: false,
 	                    flippedFrom: null
 	                });
 	            }
+	        }
+	    }, {
+	        key: '_getInitialTooltipPosition',
+	        value: function _getInitialTooltipPosition(elementRect, tooltipDirection, rootRect) {
+	            var _props = this.props;
+	            var hasTriangle = _props.hasTriangle;
+	            var triangleSize = _props.triangleSize;
+	
+	            var triangleSpacing = hasTriangle ? triangleSize : triangleSize / 2;
+	
+	            var elementDimensions = getHalfDimensions(elementRect);
+	            var rootDimensions = getHalfDimensions(rootRect);
+	
+	            var elementHalfWidth = elementDimensions('width');
+	            var elementHalfHeight = elementDimensions('height');
+	            var rootHalfWidth = rootDimensions('width');
+	            var rootHalfHeight = rootDimensions('height');
+	
+	            var left = -1 * elementHalfWidth + rootHalfWidth;
+	            var top = -1 * elementHalfHeight + rootHalfHeight;
+	            var triangleLeft = elementHalfWidth - triangleSpacing;
+	            var triangleTop = elementHalfHeight - triangleSize / 2;
+	            var spacing = triangleSpacing + 3;
+	
+	            var positions = {
+	                top: {
+	                    top: -1 * (elementRect.height + spacing),
+	                    left: left,
+	                    triangleLeft: triangleLeft
+	                },
+	                bottom: {
+	                    top: rootRect.height + spacing,
+	                    left: left,
+	                    triangleLeft: triangleLeft
+	                },
+	                left: {
+	                    top: top,
+	                    left: -1 * (elementRect.width + spacing),
+	                    triangleTop: triangleTop
+	                },
+	                right: {
+	                    top: top,
+	                    left: rootRect.width + spacing,
+	                    triangleTop: triangleTop
+	                }
+	            };
+	
+	            return positions[tooltipDirection];
 	        }
 	
 	        /**
@@ -167,38 +191,41 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var _this2 = this;
 	
 	            var tooltipDirection = this.state.tooltipDirection;
-	            var _props = this.props;
-	            var thresholds = _props.positionThresholds;
-	            var triangleSize = _props.triangleSize;
-	            var rootPosition = _props.rootPosition;
+	            var thresholds = this.props.positionThresholds;
 	
-	            var position = getInitialTooltipPosition(elementRect, triangleSize, tooltipDirection);
+	            var rootRect = this._el.parentNode.getBoundingClientRect();
+	            var position = this._getInitialTooltipPosition(elementRect, tooltipDirection, rootRect);
 	
 	            // determine the area against which we are going to check the thresholds
 	            var bounds = this.props.getBounds();
 	            var determineThresholds = {
 	                top: function top() {
-	                    return rootPosition.y - Math.abs(position.top) - bounds.top;
+	                    return rootRect.top - Math.abs(position.top) - bounds.top;
 	                },
 	                bottom: function bottom() {
-	                    return bounds.bottom - (rootPosition.y + Math.abs(position.top) + elementRect.height);
+	                    return bounds.bottom - (rootRect.top + Math.abs(position.top) + elementRect.height);
 	                }
 	            };
 	
 	            var adjustHorizontal = function adjustHorizontal() {
-	                var overflowLeft = rootPosition.x + position.left - bounds.left;
-	                var overflowRight = bounds.right - (rootPosition.x + (position.left + elementRect.width));
+	                var overflowLeft = rootRect.left + position.left - bounds.left;
+	                var overflowRight = bounds.right - (rootRect.left + (position.left + elementRect.width));
+	                var thresholdsLeft = overflowLeft - thresholds.left;
+	                var thresholdsRight = overflowRight - thresholds.right;
 	
 	                if (overflowLeft < thresholds.left) {
-	                    position.left -= overflowLeft - thresholds.left;
+	                    position.left -= thresholdsLeft;
+	                    position.triangleLeft += thresholdsLeft;
 	                    _this2.props.onThresholdPassed();
 	                }
 	
 	                if (overflowRight < thresholds.right) {
-	                    position.left += overflowRight - thresholds.right;
+	                    position.left += thresholdsRight;
+	                    position.triangleLeft -= thresholdsRight;
 	                    _this2.props.onThresholdPassed();
 	                }
 	            };
+	
 	            var changeDirection = function changeDirection(direction) {
 	                var oldState = _this2.state.tooltipDirection;
 	                _this2.setState({
@@ -248,52 +275,116 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	
 	        /**
-	         * Renders the tooltip contents if this.props.isVisible is true
+	         * Renders the tooltip contents if this.state.isVisible is true
 	         * @param  {Object} style         The style of the tooltip container
-	         * @param  {Object} triangleStyle The style of the svg triangle
 	         */
 	
 	    }, {
 	        key: '_renderContents',
-	        value: function _renderContents(style, triangleStyle) {
+	        value: function _renderContents(containerStyle) {
+	            var _props2 = this.props;
+	            var children = _props2.children;
+	            var hasTriangle = _props2.hasTriangle;
+	            var hasClose = _props2.hasClose;
+	            var containerClass = _props2.containerClass;
+	            var onClick = _props2.onClick;
 	            var tooltipDirection = this.state.tooltipDirection;
 	
-	            var tooltipClass = styles[tooltipDirection];
-	            var path = trianglePaths[tooltipDirection];
-	            var tooltipInnerClass = classNames(styles.inner, this.props.containerClass);
-	            var triangleClass = classNames(styles.triangle, this.props.triangleClass);
+	            var tooltipClass = classNames(styles[tooltipDirection], styles.container);
+	            var tooltipInnerClass = classNames(styles.inner, containerClass);
 	
 	            return React.createElement(
 	                'div',
-	                { className: tooltipClass, style: style, onClick: this.props.onClick },
+	                { className: tooltipClass, style: containerStyle, onClick: onClick },
 	                React.createElement(
 	                    'div',
 	                    { className: tooltipInnerClass },
-	                    this.props.children
+	                    children
 	                ),
+	                hasTriangle ? this._renderTriangle(tooltipDirection) : null,
+	                hasClose ? this._renderClose() : null
+	            );
+	        }
+	
+	        /**
+	         * Renders the tooltip triangle if this.props.hasTriangle is true
+	         */
+	
+	    }, {
+	        key: '_renderTriangle',
+	        value: function _renderTriangle(direction) {
+	            var _props3 = this.props;
+	            var triangleSize = _props3.triangleSize;
+	            var triangleClass = _props3.triangleClass;
+	            var _state = this.state;
+	            var left = _state.triangleLeft;
+	            var top = _state.triangleTop;
+	
+	            var triangleClassName = classNames(styles.triangle, triangleClass);
+	            var triangleDirectionPosition = -1 * triangleSize;
+	
+	            var triangleStyle = {
+	                top: {
+	                    left: left,
+	                    bottom: triangleDirectionPosition
+	                },
+	                bottom: {
+	                    left: left,
+	                    top: triangleDirectionPosition
+	                },
+	                left: {
+	                    top: top,
+	                    right: triangleDirectionPosition - 5
+	                },
+	                right: {
+	                    top: top,
+	                    left: triangleDirectionPosition - 5
+	                }
+	            };
+	
+	            return React.createElement(
+	                'svg',
+	                { className: triangleClassName, style: triangleStyle[direction], width: triangleSize * 2, height: triangleSize, viewBox: '0 0 20 10' },
+	                React.createElement('path', { d: 'M10,0 L20,10 L0,10 L10,0 L10,0 Z' })
+	            );
+	        }
+	
+	        /**
+	         * Renders the tooltip close if this.props.hasClose is true
+	         */
+	
+	    }, {
+	        key: '_renderClose',
+	        value: function _renderClose() {
+	            var _props4 = this.props;
+	            var closeClass = _props4.closeClass;
+	            var onCloseClick = _props4.onCloseClick;
+	
+	            var closeClassName = classNames(styles.close, closeClass);
+	
+	            return React.createElement(
+	                'a',
+	                { href: '#0', onClick: onCloseClick },
 	                React.createElement(
 	                    'svg',
-	                    { className: triangleClass, style: triangleStyle, width: '10', height: '10' },
-	                    React.createElement('path', { d: path })
+	                    { className: closeClassName, viewBox: '0 0 25 25' },
+	                    React.createElement('path', { d: 'M13.7001992,12.5 L24.7011952,23.500996 C25.0348606,23.8346614 25.0348606,24.37251 24.7011952,24.7011952 C24.3675299,25.0298805 23.8296813,25.0348606 23.500996,24.7011952 L12.5,13.7001992 L1.49900398,24.7011952 C1.16533865,25.0348606 0.62749004,25.0348606 0.298804781,24.7011952 C-0.0298804781,24.3675299 -0.0348605578,23.8296813 0.298804781,23.500996 L11.2998008,12.5 L0.298804781,1.49900398 C-0.0348605578,1.16533865 -0.0348605578,0.62749004 0.298804781,0.298804781 C0.63247012,-0.0298804781 1.17031873,-0.0348605578 1.49900398,0.298804781 L12.5,11.2998008 L23.500996,0.298804781 C23.8346614,-0.0348605578 24.37251,-0.0348605578 24.7011952,0.298804781 C25.0298805,0.63247012 25.0348606,1.17031873 24.7011952,1.49900398 L13.7001992,12.5 L13.7001992,12.5 Z' })
 	                )
 	            );
 	        }
 	    }, {
 	        key: 'render',
 	        value: function render() {
-	            var style = {
-	                top: this.state.top,
-	                left: this.state.left
-	            };
-	            var triangleStyle = {
-	                top: this.state.triangleTop,
-	                left: Math.abs(style.left)
-	            };
+	            var _state2 = this.state;
+	            var top = _state2.top;
+	            var left = _state2.left;
+	
+	            var containerStyle = { top: top, left: left };
 	
 	            return React.createElement(
 	                'div',
 	                { ref: 'tooltip' },
-	                this.props.isVisible ? this._renderContents(style, triangleStyle) : null
+	                this.state.isVisible ? this._renderContents(containerStyle) : null
 	            );
 	        }
 	    }]);
@@ -310,12 +401,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	}
 	
+	function getHalfDimensions(element) {
+	    return function (type) {
+	        if (element.width && type === 'width') {
+	            return element.width / 2;
+	        }
+	        if (element.height && type === 'height') {
+	            return element.height / 2;
+	        }
+	    };
+	}
+	
 	Tooltip.propTypes = {
 	    children: React.PropTypes.node,
-	    tooltipDirection: React.PropTypes.oneOf(['top', 'bottom']), // TODO: add left and right if necessary
+	    tooltipDirection: React.PropTypes.oneOf(['top', 'bottom', 'left', 'right']),
+	
 	    isVisible: React.PropTypes.bool,
+	    hasTriangle: React.PropTypes.bool,
+	    hasClose: React.PropTypes.bool,
+	
 	    containerClass: React.PropTypes.string,
 	    triangleClass: React.PropTypes.string,
+	    closeClass: React.PropTypes.string,
+	
 	    triangleSize: React.PropTypes.number,
 	    positionThresholds: React.PropTypes.shape({
 	        top: React.PropTypes.number,
@@ -323,11 +431,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        left: React.PropTypes.number,
 	        right: React.PropTypes.number
 	    }),
-	    rootPosition: React.PropTypes.shape({
-	        x: React.PropTypes.number,
-	        y: React.PropTypes.number
-	    }).isRequired,
+	
 	    onClick: React.PropTypes.func,
+	    onCloseClick: React.PropTypes.func,
 	    onThresholdPassed: React.PropTypes.func,
 	    getBounds: React.PropTypes.func
 	};
@@ -344,8 +450,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        right: 10
 	    },
 	    onClick: function onClick() {},
+	    onCloseClick: function onCloseClick() {},
 	    onThresholdPassed: function onThresholdPassed() {},
-	    getBounds: getWindowBounds
+	    getBounds: getWindowBounds,
+	    hasTriangle: true,
+	    hasClose: false
 	};
 	
 	module.exports = Tooltip;
@@ -358,15 +467,21 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 2 */
+/***/ function(module, exports) {
+
+	module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
+
+/***/ },
+/* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 	
 	// load the styles
-	var content = __webpack_require__(3);
+	var content = __webpack_require__(4);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(5)(content, {});
+	var update = __webpack_require__(6)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -383,30 +498,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 3 */
+/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(4)();
+	exports = module.exports = __webpack_require__(5)();
 	// imports
 	
 	
 	// module
-	exports.push([module.id, "/* styles for tooltip*/\n\n.Tooltip__hasShadow___3RLRe {\n    -webkit-filter: drop-shadow(3px 3px 4px #999);\n            filter: drop-shadow(3px 3px 4px #999);\n}\n.Tooltip__defaultStyle___2PHGC {\n    background-color: #D8E5F2;\n    font-family: \"Helvetica Neue\", Helvetica, Arial, sans-serif;\n    font-size: 13px;\n    padding: 15px;\n    line-height: 1.4;\n    width: 250px;\n    span ~ ul {\n        margin-top: 15px;\n    }\n    ul {\n        margin-bottom: 0;\n        /*\n        make sure the bullet points of lists are more or less aligned with the left margin of the container minus 15px padding\n        */\n        padding-left: 1.2em;\n        li {\n            margin-bottom: 10px;\n        }\n        li:last-child {\n            margin-bottom: 0;\n        }\n    }\n}\n.Tooltip__defaultTriangle___2yE9C {\n    fill: #D8E5F2;\n}\n.Tooltip__triangle___XBkZH {\n    position: absolute;\n}\n.Tooltip__container___1iGSw {\n    display: block;\n    cursor: default;\n    position: absolute;\n    z-index: 1000;\n}\n.Tooltip__inner___34nOg {\n    position: relative;\n}\n.Tooltip__top___3PYiq {\n}\n.Tooltip__bottom___3OFAJ {\n}\n\n", ""]);
+	exports.push([module.id, "/* styles for tooltip*/\n\n.Tooltip__defaultStyle___2PHGC {\n    width: 250px;\n    padding: 15px;\n    font-size: 13px;\n    line-height: 1.4;\n    text-align: left;\n    background: #fff;\n}\n\n.Tooltip__defaultClose___3C4eQ {\n    fill: #000;\n}\n\n.Tooltip__defaultTriangle___2yE9C {\n    fill: #fff;\n}\n\n.Tooltip__container___1iGSw {\n    -webkit-filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.3));\n            filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.3));\n    display: block;\n    position: absolute;\n    z-index: 1000;\n    cursor: default;\n}\n\n.Tooltip__inner___34nOg {\n    position: relative;\n}\n\n.Tooltip__svg___1D5qj {\n    max-height: 100%;\n    max-width: 100%;\n    height: auto;\n    width: auto;\n}\n\n.Tooltip__close___39mNB {\n    position: absolute;\n    right: 8px;\n    top: 8px;\n    width: 10px;\n    height: 10px;\n    cursor: pointer;\n}\n\n.Tooltip__close___39mNB:hover {\n    opacity: 0.9;\n}\n\n.Tooltip__triangle___XBkZH {\n    position: absolute;\n}\n\n.Tooltip__top___3PYiq .Tooltip__triangle___XBkZH {\n    -webkit-transform: rotate(180deg);\n            transform: rotate(180deg);\n}\n\n.Tooltip__left___2ocL0 .Tooltip__triangle___XBkZH {\n    -webkit-transform: rotate(90deg);\n            transform: rotate(90deg);\n}\n\n.Tooltip__right___1Jius .Tooltip__triangle___XBkZH {\n    -webkit-transform: rotate(-90deg);\n            transform: rotate(-90deg);\n}\n", ""]);
 	
 	// exports
 	exports.locals = {
-		"hasShadow": "Tooltip__hasShadow___3RLRe",
 		"defaultStyle": "Tooltip__defaultStyle___2PHGC",
+		"defaultClose": "Tooltip__defaultClose___3C4eQ",
 		"defaultTriangle": "Tooltip__defaultTriangle___2yE9C",
-		"triangle": "Tooltip__triangle___XBkZH",
-		"container": "Tooltip__container___1iGSw Tooltip__hasShadow___3RLRe",
+		"container": "Tooltip__container___1iGSw",
 		"inner": "Tooltip__inner___34nOg",
-		"top": "Tooltip__top___3PYiq Tooltip__container___1iGSw Tooltip__hasShadow___3RLRe",
-		"bottom": "Tooltip__bottom___3OFAJ Tooltip__container___1iGSw Tooltip__hasShadow___3RLRe"
+		"svg": "Tooltip__svg___1D5qj",
+		"close": "Tooltip__close___39mNB Tooltip__svg___1D5qj",
+		"triangle": "Tooltip__triangle___XBkZH Tooltip__svg___1D5qj",
+		"top": "Tooltip__top___3PYiq",
+		"left": "Tooltip__left___2ocL0",
+		"right": "Tooltip__right___1Jius"
 	};
 
 /***/ },
-/* 4 */
+/* 5 */
 /***/ function(module, exports) {
 
 	/*
@@ -462,7 +580,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -678,7 +796,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	function applyToTag(styleElement, obj) {
 		var css = obj.css;
 		var media = obj.media;
-		var sourceMap = obj.sourceMap;
 	
 		if(media) {
 			styleElement.setAttribute("media", media)
@@ -696,7 +813,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	function updateLink(linkElement, obj) {
 		var css = obj.css;
-		var media = obj.media;
 		var sourceMap = obj.sourceMap;
 	
 		if(sourceMap) {
@@ -714,12 +830,6 @@ return /******/ (function(modules) { // webpackBootstrap
 			URL.revokeObjectURL(oldSrc);
 	}
 
-
-/***/ },
-/* 6 */
-/***/ function(module, exports) {
-
-	module.exports = __WEBPACK_EXTERNAL_MODULE_6__;
 
 /***/ }
 /******/ ])
