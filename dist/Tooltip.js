@@ -120,7 +120,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                if (this._el && this._el.childNodes.length) {
 	                    // childNodes[0] is the contents of the tooltip, it's not present until the first time the component is shown so we can't do in componentDidMount
 	                    var rect = this._el.childNodes[0].getBoundingClientRect();
-	                    this._adjustPosition(rect);
+	                    var rootRect = this._el.parentNode.getBoundingClientRect();
+	                    this._adjustPosition(rect, rootRect);
 	                }
 	            } else if (!this.state.isVisible && this.state.moved) {
 	                // make sure the position gets adjusted next time the tooltip is opened
@@ -187,13 +188,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    }, {
 	        key: '_adjustPosition',
-	        value: function _adjustPosition(elementRect) {
+	        value: function _adjustPosition(elementRect, rootRect) {
 	            var _this2 = this;
 	
 	            var tooltipDirection = this.state.tooltipDirection;
 	            var thresholds = this.props.positionThresholds;
 	
-	            var rootRect = this._el.parentNode.getBoundingClientRect();
 	            var position = this._getInitialTooltipPosition(elementRect, tooltipDirection, rootRect);
 	
 	            // determine the area against which we are going to check the thresholds

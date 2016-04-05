@@ -6,20 +6,19 @@ const Tooltip = require('../Tooltip');
 const {expect} = require('chai');
 const sinon = require('sinon');
 
-
 describe('Tooltip', () => {
+    const rootRect = {
+        top: 20,
+        left: 20,
+        height: 30,
+        width: 30
+    };
     let renderer;
     let component;
     let props;
 
     beforeEach(() => {
         renderer = TestUtils.createRenderer();
-        props = {
-            rootPosition: {
-                x: 10,
-                y: 10
-            }
-        };
     });
 
     describe('If the tooltip is not visible', () => {
@@ -67,28 +66,24 @@ describe('Tooltip', () => {
                     right: 10
                 },
                 triangleSize: 10,
-                rootPosition: {
-                    x: 20,
-                    y: 20
-                },
                 onThresholdPassed: () => {},
                 getBounds: () => ({top:0, left: 0, right: 500, bottom: 500})
             }, props);
         });
 
         it('should display on top if the tooltip fits on the screen', () => {
-            props.rootPosition.y = 200;
             const tooltip = new Tooltip(props);
             const stub = sinon.stub(tooltip, 'setState', state => {
                 tooltip.state = Object.assign({}, tooltip.state, state);
             });
+            rootRect.top = 200;
 
             tooltip._adjustPosition({
                 top: 30,
                 left: 10,
                 height: 100,
                 width: 100
-            });
+            }, rootRect);
 
             expect(tooltip.state.moved).to.equal(true);
             expect(tooltip.state.tooltipDirection).to.equal('top');
@@ -102,13 +97,14 @@ describe('Tooltip', () => {
             const stub = sinon.stub(tooltip, 'setState', state => {
                 tooltip.state = Object.assign({}, tooltip.state, state);
             });
+            rootRect.top = 20;
 
             tooltip._adjustPosition({
                 top: 10,
                 left: 10,
                 height: 100,
                 width: 100
-            });
+            }, rootRect);
 
             expect(tooltip.state.moved).to.equal(false);
             expect(tooltip.state.tooltipDirection).to.equal('bottom');

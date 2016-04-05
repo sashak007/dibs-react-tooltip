@@ -45,7 +45,8 @@ class Tooltip extends React.Component {
             if (this._el && this._el.childNodes.length) {
                 // childNodes[0] is the contents of the tooltip, it's not present until the first time the component is shown so we can't do in componentDidMount
                 const rect = this._el.childNodes[0].getBoundingClientRect();
-                this._adjustPosition(rect);
+                const rootRect = this._el.parentNode.getBoundingClientRect();
+                this._adjustPosition(rect, rootRect);
             }
         } else if (!this.state.isVisible && this.state.moved) {
             // make sure the position gets adjusted next time the tooltip is opened
@@ -105,10 +106,9 @@ class Tooltip extends React.Component {
      * it would go offscreen, then offset the position so the whole tooltip is still displayed onscreen.
      * @param  {Object} elementRect A rectangle indicating the dimensions of the tooltip element
      */
-    _adjustPosition(elementRect) {
+    _adjustPosition(elementRect, rootRect) {
         const { tooltipDirection } = this.state;
         const { positionThresholds: thresholds } = this.props;
-        const rootRect = this._el.parentNode.getBoundingClientRect();
         const position = this._getInitialTooltipPosition(elementRect, tooltipDirection, rootRect);
 
         // determine the area against which we are going to check the thresholds
