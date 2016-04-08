@@ -3,15 +3,8 @@
 'use strict';
 
 const React = require('react');
-const styles = require('./styles/Tooltip.css');
 const classNames = require('classnames');
-
-const trianglePaths = {
-    top: 'm0,0 h10 l-5,10z',
-    left: '',
-    bottom: 'm0,10 h10 l-5,-10z',
-    right: ''
-};
+const styles = require('./styles/Tooltip.css');
 
 const oppositeDirections = {
     top: 'bottom',
@@ -19,26 +12,6 @@ const oppositeDirections = {
     left: 'right',
     right: 'left'
 };
-
-function getInitialTooltipPosition(elementRect, triangleSize, tooltipDirection) {
-    const topPadding = 10;
-    const positions = {
-        top: {
-            top: (-1 * elementRect.height) - triangleSize,
-            left: -1 * (elementRect.width / 2),
-            triangleTop: elementRect.height
-        },
-        bottom: {
-            top: topPadding + (triangleSize * 2),
-            left: -1 * (elementRect.width / 2),
-            triangleTop: -1 * triangleSize
-        },
-        left: {},
-        right: {}
-    };
-    return positions[tooltipDirection];
-}
-
 
 class Tooltip extends React.Component {
     constructor(props) {
@@ -48,8 +21,9 @@ class Tooltip extends React.Component {
             top: 0,
             left: 0,
             moved: false,
+            flippedFrom: null,
             tooltipDirection: props.tooltipDirection,
-            flippedFrom: null
+            isVisible: props.isVisible
         };
 
         this._el = null;
@@ -61,18 +35,20 @@ class Tooltip extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         this.setState({
-            tooltipDirection: nextProps.tooltipDirection || this.state.tooltipDirection
+            tooltipDirection: nextProps.tooltipDirection || this.state.tooltipDirection,
+            isVisible: nextProps.isVisible
         });
     }
 
     componentDidUpdate() {
-        if (this.props.isVisible && !this.state.moved) {
+        if (this.state.isVisible && !this.state.moved) {
             if (this._el && this._el.childNodes.length) {
                 // childNodes[0] is the contents of the tooltip, it's not present until the first time the component is shown so we can't do in componentDidMount
                 const rect = this._el.childNodes[0].getBoundingClientRect();
-                this._adjustPosition(rect);
+                const rootRect = this._el.parentNode.getBoundingClientRect();
+                this._adjustPosition(rect, rootRect);
             }
-        } else if (!this.props.isVisible && this.state.moved) {
+        } else if (!this.state.isVisible && this.state.moved) {
             // make sure the position gets adjusted next time the tooltip is opened
             this.setState({
                 moved: false,
@@ -81,41 +57,86 @@ class Tooltip extends React.Component {
         }
     }
 
+    _getInitialTooltipPosition(elementRect, tooltipDirection, rootRect) {
+        const { hasTriangle, triangleSize } = this.props;
+        const triangleSpacing = hasTriangle ? triangleSize : (triangleSize / 2);
+
+        const elementDimensions = getHalfDimensions(elementRect);
+        const rootDimensions = getHalfDimensions(rootRect);
+
+        const elementHalfWidth = elementDimensions('width');
+        const elementHalfHeight = elementDimensions('height');
+        const rootHalfWidth = rootDimensions('width');
+        const rootHalfHeight = rootDimensions('height');
+
+        const left = -1 * elementHalfWidth + rootHalfWidth;
+        const top = -1 * elementHalfHeight + rootHalfHeight;
+        const triangleLeft = elementHalfWidth - triangleSpacing;
+        const triangleTop = elementHalfHeight - (triangleSize / 2);
+        const spacing = triangleSpacing + 3;
+
+        const positions = {
+            top: {
+                top: -1 * (elementRect.height + spacing),
+                left,
+                triangleLeft
+            },
+            bottom: {
+                top: rootRect.height + spacing,
+                left,
+                triangleLeft
+            },
+            left: {
+                top,
+                left: -1 * (elementRect.width + spacing),
+                triangleTop
+            },
+            right: {
+                top,
+                left: rootRect.width + spacing,
+                triangleTop
+            }
+        };
+
+        return positions[tooltipDirection];
+    }
+
     /**
      * Adjusts the position of the tooltip element so that it's centered if possible. If it can't be centered because
      * it would go offscreen, then offset the position so the whole tooltip is still displayed onscreen.
      * @param  {Object} elementRect A rectangle indicating the dimensions of the tooltip element
      */
-    _adjustPosition(elementRect) {
-        const {tooltipDirection} = this.state;
-        const {
-            positionThresholds: thresholds,
-            triangleSize,
-            rootPosition
-        } = this.props;
-        const position = getInitialTooltipPosition(elementRect, triangleSize, tooltipDirection);
+    _adjustPosition(elementRect, rootRect) {
+        const { tooltipDirection } = this.state;
+        const { positionThresholds: thresholds } = this.props;
+        const position = this._getInitialTooltipPosition(elementRect, tooltipDirection, rootRect);
 
         // determine the area against which we are going to check the thresholds
         const bounds = this.props.getBounds();
         const determineThresholds = {
-            top: () => rootPosition.y - Math.abs(position.top) - bounds.top,
-            bottom: () => bounds.bottom - (rootPosition.y + Math.abs(position.top) + elementRect.height)
+            top: () => rootRect.top - Math.abs(position.top) - bounds.top,
+            bottom: () => bounds.bottom - (rootRect.top + Math.abs(position.top) + elementRect.height)
         };
 
         const adjustHorizontal = () => {
-            const overflowLeft = (rootPosition.x + position.left) - bounds.left;
-            const overflowRight = bounds.right - (rootPosition.x + (position.left + elementRect.width));
+            const overflowLeft = (rootRect.left + position.left) - bounds.left;
+            const overflowRight = bounds.right - (rootRect.left + (position.left + elementRect.width));
+            const thresholdsLeft = overflowLeft - thresholds.left;
+            const thresholdsRight = overflowRight - thresholds.right;
 
             if (overflowLeft < thresholds.left) {
-                position.left -= (overflowLeft - thresholds.left);
+                position.left -= thresholdsLeft;
+                position.triangleLeft += thresholdsLeft;
                 this.props.onThresholdPassed();
             }
 
             if (overflowRight < thresholds.right) {
-                position.left += (overflowRight - thresholds.right);
+                position.left += thresholdsRight;
+                position.triangleLeft -= thresholdsRight;
                 this.props.onThresholdPassed();
             }
         };
+
         const changeDirection = direction => {
             const oldState = this.state.tooltipDirection;
             this.setState({
@@ -165,42 +186,84 @@ class Tooltip extends React.Component {
     }
 
     /**
-     * Renders the tooltip contents if this.props.isVisible is true
+     * Renders the tooltip contents if this.state.isVisible is true
      * @param  {Object} style         The style of the tooltip container
-     * @param  {Object} triangleStyle The style of the svg triangle
      */
-    _renderContents(style, triangleStyle) {
-        const {tooltipDirection} = this.state;
-        const tooltipClass = styles[tooltipDirection];
-        const path = trianglePaths[tooltipDirection];
-        const tooltipInnerClass = classNames(styles.inner, this.props.containerClass);
-        const triangleClass = classNames(styles.triangle, this.props.triangleClass);
+    _renderContents(containerStyle) {
+        const { children, hasTriangle, hasClose, containerClass, onClick } = this.props;
+        const { tooltipDirection } = this.state;
+        const tooltipClass = classNames(styles[tooltipDirection], styles.container);
+        const tooltipInnerClass = classNames(styles.inner, containerClass);
 
         return (
-            <div className={tooltipClass} style={style} onClick={this.props.onClick}>
+            <div className={tooltipClass} style={containerStyle} onClick={onClick}>
                 <div className={tooltipInnerClass}>
-                    {this.props.children}
+                    {children}
                 </div>
-                <svg className={triangleClass} style={triangleStyle} width="10" height="10">
-                    <path d={path} />
-                </svg>
+                {hasTriangle ? this._renderTriangle(tooltipDirection) : null}
+                {hasClose ? this._renderClose() : null}
             </div>
         );
     }
 
-    render() {
-        const style = {
-            top: this.state.top,
-            left: this.state.left
-        };
+    /**
+     * Renders the tooltip triangle if this.props.hasTriangle is true
+     */
+    _renderTriangle(direction) {
+        const { triangleSize, triangleClass } = this.props;
+        const { triangleLeft: left, triangleTop: top } = this.state;
+        const triangleClassName = classNames(styles.triangle, triangleClass);
+        const triangleDirectionPosition = -1 * triangleSize;
+
         const triangleStyle = {
-            top: this.state.triangleTop,
-            left: Math.abs(style.left)
+            top: {
+                left,
+                bottom: triangleDirectionPosition
+            },
+            bottom: {
+                left,
+                top: triangleDirectionPosition
+            },
+            left: {
+                top,
+                right: triangleDirectionPosition - 5
+            },
+            right: {
+                top,
+                left: triangleDirectionPosition - 5
+            }
         };
 
         return (
+            <svg className={triangleClassName} style={triangleStyle[direction]} width={triangleSize * 2} height={triangleSize} viewBox="0 0 20 10">
+                <path d="M10,0 L20,10 L0,10 L10,0 L10,0 Z"></path>
+            </svg>
+        );
+    }
+
+    /**
+     * Renders the tooltip close if this.props.hasClose is true
+     */
+    _renderClose() {
+        const { closeClass, onCloseClick } = this.props;
+        const closeClassName = classNames(styles.close, closeClass);
+
+        return (
+            <a href="#0" onClick={onCloseClick}>
+                <svg className={closeClassName} viewBox="0 0 25 25">
+                    <path d="M13.7001992,12.5 L24.7011952,23.500996 C25.0348606,23.8346614 25.0348606,24.37251 24.7011952,24.7011952 C24.3675299,25.0298805 23.8296813,25.0348606 23.500996,24.7011952 L12.5,13.7001992 L1.49900398,24.7011952 C1.16533865,25.0348606 0.62749004,25.0348606 0.298804781,24.7011952 C-0.0298804781,24.3675299 -0.0348605578,23.8296813 0.298804781,23.500996 L11.2998008,12.5 L0.298804781,1.49900398 C-0.0348605578,1.16533865 -0.0348605578,0.62749004 0.298804781,0.298804781 C0.63247012,-0.0298804781 1.17031873,-0.0348605578 1.49900398,0.298804781 L12.5,11.2998008 L23.500996,0.298804781 C23.8346614,-0.0348605578 24.37251,-0.0348605578 24.7011952,0.298804781 C25.0298805,0.63247012 25.0348606,1.17031873 24.7011952,1.49900398 L13.7001992,12.5 L13.7001992,12.5 Z"></path>
+                </svg>
+            </a>
+        );
+    }
+
+    render() {
+        const { top, left } = this.state;
+        const containerStyle = { top, left };
+
+        return (
             <div ref='tooltip'>
-                {this.props.isVisible ? this._renderContents(style, triangleStyle) : null}
+                {this.state.isVisible ? this._renderContents(containerStyle) : null}
             </div>
         );
     }
@@ -215,12 +278,29 @@ function getWindowBounds() {
     };
 }
 
+function getHalfDimensions(element) {
+    return function (type) {
+        if (element.width && type === 'width') {
+            return element.width / 2;
+        }
+        if (element.height && type === 'height') {
+            return element.height / 2;
+        }
+    }
+}
+
 Tooltip.propTypes = {
     children: React.PropTypes.node,
-    tooltipDirection: React.PropTypes.oneOf(['top', 'bottom']),     // TODO: add left and right if necessary
+    tooltipDirection: React.PropTypes.oneOf(['top', 'bottom', 'left', 'right']),
+
     isVisible: React.PropTypes.bool,
+    hasTriangle: React.PropTypes.bool,
+    hasClose: React.PropTypes.bool,
+
     containerClass: React.PropTypes.string,
     triangleClass: React.PropTypes.string,
+    closeClass: React.PropTypes.string,
+
     triangleSize: React.PropTypes.number,
     positionThresholds: React.PropTypes.shape({
         top: React.PropTypes.number,
@@ -228,11 +308,9 @@ Tooltip.propTypes = {
         left: React.PropTypes.number,
         right: React.PropTypes.number
     }),
-    rootPosition: React.PropTypes.shape({
-        x: React.PropTypes.number,
-        y: React.PropTypes.number
-    }).isRequired,
+
     onClick: React.PropTypes.func,
+    onCloseClick: React.PropTypes.func,
     onThresholdPassed: React.PropTypes.func,
     getBounds: React.PropTypes.func
 };
@@ -249,8 +327,11 @@ Tooltip.defaultProps = {
         right: 10
     },
     onClick: () => {},
+    onCloseClick: () => {},
     onThresholdPassed: () => {},
-    getBounds: getWindowBounds
+    getBounds: getWindowBounds,
+    hasTriangle: true,
+    hasClose: false
 };
 
 module.exports = Tooltip;
