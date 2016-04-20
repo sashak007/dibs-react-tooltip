@@ -47,6 +47,12 @@ class Tooltip extends React.Component {
         };
     }
 
+    componentDidMount() {
+        if (this.state.isVisible) {
+            this._adjustPosition();
+        }
+    }
+
     componentWillReceiveProps(nextProps) {
         this.setState({
             tooltipDirection: nextProps.tooltipDirection || this.state.tooltipDirection,
@@ -56,12 +62,7 @@ class Tooltip extends React.Component {
 
     componentDidUpdate() {
         if (this.state.isVisible && !this.state.moved) {
-            if (this._tooltip && this._tooltip.childNodes.length) {
-                // childNodes[0] is the contents of the tooltip, it's not present until the first time the component is shown so we can't do in componentDidMount
-                const rect = this._tooltip.childNodes[0].getBoundingClientRect();
-                const rootRect = this._tooltip.parentNode.getBoundingClientRect();
-                this._adjustPosition(rect, rootRect);
-            }
+            this._adjustPosition();
         } else if (!this.state.isVisible && this.state.moved) {
             // make sure the position gets adjusted next time the tooltip is opened
             this.setState({
@@ -115,12 +116,20 @@ class Tooltip extends React.Component {
         return positions[tooltipDirection];
     }
 
+    _getElementsPositions() {
+        return {
+            elementRect: this._tooltip.childNodes[0].getBoundingClientRect(),
+            rootRect: this._tooltip.parentNode.getBoundingClientRect()
+        };
+    }
+
     /**
      * Adjusts the position of the tooltip element so that it's centered if possible. If it can't be centered because
      * it would go offscreen, then offset the position so the whole tooltip is still displayed onscreen.
      * @param  {Object} elementRect A rectangle indicating the dimensions of the tooltip element
      */
-    _adjustPosition(elementRect, rootRect) {
+    _adjustPosition() {
+        const { elementRect, rootRect } = this._getElementsPositions();
         const { tooltipDirection } = this.state;
         const { positionThresholds: thresholds } = this.props;
         const position = this._getInitialTooltipPosition(elementRect, tooltipDirection, rootRect);
@@ -251,7 +260,7 @@ class Tooltip extends React.Component {
         return (
             <svg className={triangleClassName} style={triangleStyle[direction]} width={triangleSize * 2} height={triangleSize} viewBox="0 0 20 10">
                 <polygon points="9.65217424 0 19.3043485 9.25000032 0 9.25000032"></polygon>
-                <polygon className={styles.triangleStroke} stroke-linecap="square" points="9.65723177 0.421508695 9.66228432 0.416666667 9.6572594 0.421535177 18.4448983 8.84302248 18.3478314 8.84165446 9.65723177 0.42156195 0.966632149 8.84165446 0.869565217 8.84302248 9.65720414 0.421535177 9.65217922 0.416666667"></polygon>
+                <polygon className={styles.triangleStroke} strokeLinecap="square" points="9.65723177 0.421508695 9.66228432 0.416666667 9.6572594 0.421535177 18.4448983 8.84302248 18.3478314 8.84165446 9.65723177 0.42156195 0.966632149 8.84165446 0.869565217 8.84302248 9.65720414 0.421535177 9.65217922 0.416666667"></polygon>
             </svg>
         );
     }
