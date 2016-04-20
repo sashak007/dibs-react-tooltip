@@ -18,7 +18,7 @@
 }
 
 :local(.container) {
-    filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.3));
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
     display: block;
     position: absolute;
     z-index: 1000;
@@ -32,8 +32,6 @@
 :local(.svg) {
     max-height: 100%;
     max-width: 100%;
-    height: auto;
-    width: auto;
 }
 
 :local(.close) {
@@ -53,6 +51,10 @@
 :local(.triangle) {
     composes: svg;
     position: absolute;
+}
+
+:local(.triangleStroke) {
+    stroke: rgba(0, 0, 0, 0.1);
 }
 
 :local(.top .triangle) {

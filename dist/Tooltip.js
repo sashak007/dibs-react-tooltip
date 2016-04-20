@@ -326,26 +326,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var triangleStyle = {
 	                top: {
 	                    left: left,
-	                    bottom: triangleDirectionPosition
+	                    bottom: triangleDirectionPosition + 1
 	                },
 	                bottom: {
 	                    left: left,
-	                    top: triangleDirectionPosition
+	                    top: triangleDirectionPosition + 1
 	                },
 	                left: {
 	                    top: top,
-	                    right: triangleDirectionPosition - 5
+	                    right: triangleDirectionPosition - 4
 	                },
 	                right: {
 	                    top: top,
-	                    left: triangleDirectionPosition - 5
+	                    left: triangleDirectionPosition - 4
 	                }
 	            };
 	
 	            return React.createElement(
 	                'svg',
 	                { className: triangleClassName, style: triangleStyle[direction], width: triangleSize * 2, height: triangleSize, viewBox: '0 0 20 10' },
-	                React.createElement('path', { d: 'M10,0 L20,10 L0,10 L10,0 L10,0 Z' })
+	                React.createElement('polygon', { points: '9.65217424 0 19.3043485 9.25000032 0 9.25000032' }),
+	                React.createElement('polygon', { className: styles.triangleStroke, 'stroke-linecap': 'square', points: '9.65723177 0.421508695 9.66228432 0.416666667 9.6572594 0.421535177 18.4448983 8.84302248 18.3478314 8.84165446 9.65723177 0.42156195 0.966632149 8.84165446 0.869565217 8.84302248 9.65720414 0.421535177 9.65217922 0.416666667' })
 	            );
 	        }
 	
@@ -506,7 +507,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	
 	// module
-	exports.push([module.id, "/* styles for tooltip*/\n\n.Tooltip__defaultStyle___2PHGC {\n    width: 250px;\n    padding: 15px;\n    font-size: 13px;\n    line-height: 1.4;\n    text-align: left;\n    background: #fff;\n}\n\n.Tooltip__defaultClose___3C4eQ {\n    fill: #000;\n}\n\n.Tooltip__defaultTriangle___2yE9C {\n    fill: #fff;\n}\n\n.Tooltip__container___1iGSw {\n    -webkit-filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.3));\n            filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.3));\n    display: block;\n    position: absolute;\n    z-index: 1000;\n    cursor: default;\n}\n\n.Tooltip__inner___34nOg {\n    position: relative;\n}\n\n.Tooltip__svg___1D5qj {\n    max-height: 100%;\n    max-width: 100%;\n    height: auto;\n    width: auto;\n}\n\n.Tooltip__close___39mNB {\n    position: absolute;\n    right: 8px;\n    top: 8px;\n    width: 10px;\n    height: 10px;\n    cursor: pointer;\n}\n\n.Tooltip__close___39mNB:hover {\n    opacity: 0.9;\n}\n\n.Tooltip__triangle___XBkZH {\n    position: absolute;\n}\n\n.Tooltip__top___3PYiq .Tooltip__triangle___XBkZH {\n    -webkit-transform: rotate(180deg);\n            transform: rotate(180deg);\n}\n\n.Tooltip__left___2ocL0 .Tooltip__triangle___XBkZH {\n    -webkit-transform: rotate(90deg);\n            transform: rotate(90deg);\n}\n\n.Tooltip__right___1Jius .Tooltip__triangle___XBkZH {\n    -webkit-transform: rotate(-90deg);\n            transform: rotate(-90deg);\n}\n", ""]);
+	exports.push([module.id, "/* styles for tooltip*/\n\n.Tooltip__defaultStyle___2PHGC {\n    width: 250px;\n    padding: 15px;\n    font-size: 13px;\n    line-height: 1.4;\n    text-align: left;\n    background: #fff;\n}\n\n.Tooltip__defaultClose___3C4eQ {\n    fill: #000;\n}\n\n.Tooltip__defaultTriangle___2yE9C {\n    fill: #fff;\n}\n\n.Tooltip__container___1iGSw {\n    box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);\n    display: block;\n    position: absolute;\n    z-index: 1000;\n    cursor: default;\n}\n\n.Tooltip__inner___34nOg {\n    position: relative;\n}\n\n.Tooltip__svg___1D5qj {\n    max-height: 100%;\n    max-width: 100%;\n}\n\n.Tooltip__close___39mNB {\n    position: absolute;\n    right: 8px;\n    top: 8px;\n    width: 10px;\n    height: 10px;\n    cursor: pointer;\n}\n\n.Tooltip__close___39mNB:hover {\n    opacity: 0.9;\n}\n\n.Tooltip__triangle___XBkZH {\n    position: absolute;\n}\n\n.Tooltip__triangleStroke___1qO6p {\n    stroke: rgba(0, 0, 0, 0.1);\n}\n\n.Tooltip__top___3PYiq .Tooltip__triangle___XBkZH {\n    -webkit-transform: rotate(180deg);\n            transform: rotate(180deg);\n}\n\n.Tooltip__left___2ocL0 .Tooltip__triangle___XBkZH {\n    -webkit-transform: rotate(90deg);\n            transform: rotate(90deg);\n}\n\n.Tooltip__right___1Jius .Tooltip__triangle___XBkZH {\n    -webkit-transform: rotate(-90deg);\n            transform: rotate(-90deg);\n}\n", ""]);
 	
 	// exports
 	exports.locals = {
@@ -518,6 +519,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		"svg": "Tooltip__svg___1D5qj",
 		"close": "Tooltip__close___39mNB Tooltip__svg___1D5qj",
 		"triangle": "Tooltip__triangle___XBkZH Tooltip__svg___1D5qj",
+		"triangleStroke": "Tooltip__triangleStroke___1qO6p",
 		"top": "Tooltip__top___3PYiq",
 		"left": "Tooltip__left___2ocL0",
 		"right": "Tooltip__right___1Jius"

@@ -218,25 +218,26 @@ class Tooltip extends React.Component {
         const triangleStyle = {
             top: {
                 left,
-                bottom: triangleDirectionPosition
+                bottom: triangleDirectionPosition + 1
             },
             bottom: {
                 left,
-                top: triangleDirectionPosition
+                top: triangleDirectionPosition + 1
             },
             left: {
                 top,
-                right: triangleDirectionPosition - 5
+                right: triangleDirectionPosition - 4
             },
             right: {
                 top,
-                left: triangleDirectionPosition - 5
+                left: triangleDirectionPosition - 4
             }
         };
 
         return (
             <svg className={triangleClassName} style={triangleStyle[direction]} width={triangleSize * 2} height={triangleSize} viewBox="0 0 20 10">
-                <path d="M10,0 L20,10 L0,10 L10,0 L10,0 Z"></path>
+                <polygon points="9.65217424 0 19.3043485 9.25000032 0 9.25000032"></polygon>
+                <polygon className={styles.triangleStroke} stroke-linecap="square" points="9.65723177 0.421508695 9.66228432 0.416666667 9.6572594 0.421535177 18.4448983 8.84302248 18.3478314 8.84165446 9.65723177 0.42156195 0.966632149 8.84165446 0.869565217 8.84302248 9.65720414 0.421535177 9.65217922 0.416666667"></polygon>
             </svg>
         );
     }
