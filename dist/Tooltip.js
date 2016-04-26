@@ -79,6 +79,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	    right: 'left'
 	};
 	
+	function getWindowBounds() {
+	    return {
+	        top: 0,
+	        left: 0,
+	        right: window.innerWidth,
+	        bottom: window.innerHeight
+	    };
+	}
+	
+	function getHalfDimensions(element) {
+	    return function (type) {
+	        if (element.width && type === 'width') {
+	            return element.width / 2;
+	        }
+	        if (element.height && type === 'height') {
+	            return element.height / 2;
+	        }
+	    };
+	}
+	
 	var Tooltip = function (_React$Component) {
 	    _inherits(Tooltip, _React$Component);
 	
@@ -95,17 +115,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	            tooltipDirection: props.tooltipDirection,
 	            isVisible: props.isVisible
 	        };
-	
-	        _this._el = null;
 	        return _this;
 	    }
 	
 	    _createClass(Tooltip, [{
-	        key: 'componentDidMount',
-	        value: function componentDidMount() {
-	            this._el = this.refs.tooltip;
-	        }
-	    }, {
 	        key: 'componentWillReceiveProps',
 	        value: function componentWillReceiveProps(nextProps) {
 	            this.setState({
@@ -117,10 +130,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        key: 'componentDidUpdate',
 	        value: function componentDidUpdate() {
 	            if (this.state.isVisible && !this.state.moved) {
-	                if (this._el && this._el.childNodes.length) {
+	                if (this._tooltip && this._tooltip.childNodes.length) {
 	                    // childNodes[0] is the contents of the tooltip, it's not present until the first time the component is shown so we can't do in componentDidMount
-	                    var rect = this._el.childNodes[0].getBoundingClientRect();
-	                    var rootRect = this._el.parentNode.getBoundingClientRect();
+	                    var rect = this._tooltip.childNodes[0].getBoundingClientRect();
+	                    var rootRect = this._tooltip.parentNode.getBoundingClientRect();
 	                    this._adjustPosition(rect, rootRect);
 	                }
 	            } else if (!this.state.isVisible && this.state.moved) {
@@ -283,6 +296,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        key: '_renderContents',
 	        value: function _renderContents(containerStyle) {
 	            var _props2 = this.props;
+	            var className = _props2.className;
 	            var children = _props2.children;
 	            var hasTriangle = _props2.hasTriangle;
 	            var hasClose = _props2.hasClose;
@@ -290,7 +304,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var onClick = _props2.onClick;
 	            var tooltipDirection = this.state.tooltipDirection;
 	
-	            var tooltipClass = classNames(styles[tooltipDirection], styles.container);
+	            var tooltipClass = classNames(styles[tooltipDirection], styles.container, className);
 	            var tooltipInnerClass = classNames(styles.inner, containerClass);
 	
 	            return React.createElement(
@@ -376,6 +390,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'render',
 	        value: function render() {
+	            var _this3 = this;
+	
 	            var _state2 = this.state;
 	            var top = _state2.top;
 	            var left = _state2.left;
@@ -384,7 +400,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	            return React.createElement(
 	                'div',
-	                { ref: 'tooltip' },
+	                { ref: function ref(tooltip) {
+	                        _this3._tooltip = tooltip;
+	                    } },
 	                this.state.isVisible ? this._renderContents(containerStyle) : null
 	            );
 	        }
@@ -392,26 +410,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    return Tooltip;
 	}(React.Component);
-	
-	function getWindowBounds() {
-	    return {
-	        top: 0,
-	        left: 0,
-	        right: window.innerWidth,
-	        bottom: window.innerHeight
-	    };
-	}
-	
-	function getHalfDimensions(element) {
-	    return function (type) {
-	        if (element.width && type === 'width') {
-	            return element.width / 2;
-	        }
-	        if (element.height && type === 'height') {
-	            return element.height / 2;
-	        }
-	    };
-	}
 	
 	Tooltip.propTypes = {
 	    children: React.PropTypes.node,
@@ -421,6 +419,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    hasTriangle: React.PropTypes.bool,
 	    hasClose: React.PropTypes.bool,
 	
+	    className: React.PropTypes.string,
 	    containerClass: React.PropTypes.string,
 	    triangleClass: React.PropTypes.string,
 	    closeClass: React.PropTypes.string,
@@ -440,6 +439,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	
 	Tooltip.defaultProps = {
+	    className: '',
 	    containerClass: styles.defaultStyle,
 	    triangleClass: styles.defaultTriangle,
 	    triangleSize: 10,

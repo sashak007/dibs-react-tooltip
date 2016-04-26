@@ -13,6 +13,26 @@ const oppositeDirections = {
     right: 'left'
 };
 
+function getWindowBounds() {
+    return {
+        top: 0,
+        left: 0,
+        right: window.innerWidth,
+        bottom: window.innerHeight
+    };
+}
+
+function getHalfDimensions(element) {
+    return function (type) {
+        if (element.width && type === 'width') {
+            return element.width / 2;
+        }
+        if (element.height && type === 'height') {
+            return element.height / 2;
+        }
+    };
+}
+
 class Tooltip extends React.Component {
     constructor(props) {
         super(props);
@@ -25,12 +45,6 @@ class Tooltip extends React.Component {
             tooltipDirection: props.tooltipDirection,
             isVisible: props.isVisible
         };
-
-        this._el = null;
-    }
-
-    componentDidMount() {
-        this._el = this.refs.tooltip;
     }
 
     componentWillReceiveProps(nextProps) {
@@ -42,10 +56,10 @@ class Tooltip extends React.Component {
 
     componentDidUpdate() {
         if (this.state.isVisible && !this.state.moved) {
-            if (this._el && this._el.childNodes.length) {
+            if (this._tooltip && this._tooltip.childNodes.length) {
                 // childNodes[0] is the contents of the tooltip, it's not present until the first time the component is shown so we can't do in componentDidMount
-                const rect = this._el.childNodes[0].getBoundingClientRect();
-                const rootRect = this._el.parentNode.getBoundingClientRect();
+                const rect = this._tooltip.childNodes[0].getBoundingClientRect();
+                const rootRect = this._tooltip.parentNode.getBoundingClientRect();
                 this._adjustPosition(rect, rootRect);
             }
         } else if (!this.state.isVisible && this.state.moved) {
@@ -190,9 +204,9 @@ class Tooltip extends React.Component {
      * @param  {Object} style         The style of the tooltip container
      */
     _renderContents(containerStyle) {
-        const { children, hasTriangle, hasClose, containerClass, onClick } = this.props;
+        const { className, children, hasTriangle, hasClose, containerClass, onClick } = this.props;
         const { tooltipDirection } = this.state;
-        const tooltipClass = classNames(styles[tooltipDirection], styles.container);
+        const tooltipClass = classNames(styles[tooltipDirection], styles.container, className);
         const tooltipInnerClass = classNames(styles.inner, containerClass);
 
         return (
@@ -263,30 +277,10 @@ class Tooltip extends React.Component {
         const containerStyle = { top, left };
 
         return (
-            <div ref='tooltip'>
+            <div ref={tooltip => { this._tooltip = tooltip; }}>
                 {this.state.isVisible ? this._renderContents(containerStyle) : null}
             </div>
         );
-    }
-}
-
-function getWindowBounds() {
-    return {
-        top: 0,
-        left: 0,
-        right: window.innerWidth,
-        bottom: window.innerHeight
-    };
-}
-
-function getHalfDimensions(element) {
-    return function (type) {
-        if (element.width && type === 'width') {
-            return element.width / 2;
-        }
-        if (element.height && type === 'height') {
-            return element.height / 2;
-        }
     }
 }
 
@@ -298,6 +292,7 @@ Tooltip.propTypes = {
     hasTriangle: React.PropTypes.bool,
     hasClose: React.PropTypes.bool,
 
+    className: React.PropTypes.string,
     containerClass: React.PropTypes.string,
     triangleClass: React.PropTypes.string,
     closeClass: React.PropTypes.string,
@@ -317,6 +312,7 @@ Tooltip.propTypes = {
 };
 
 Tooltip.defaultProps = {
+    className: '',
     containerClass: styles.defaultStyle,
     triangleClass: styles.defaultTriangle,
     triangleSize: 10,
