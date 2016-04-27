@@ -7,12 +7,6 @@ const {expect} = require('chai');
 const sinon = require('sinon');
 
 describe('Tooltip', () => {
-    const rootRect = {
-        top: 20,
-        left: 20,
-        height: 30,
-        width: 30
-    };
     let renderer;
     let component;
     let props;
@@ -55,7 +49,27 @@ describe('Tooltip', () => {
 
     describe('Updating the component', () => {
 
+        let elementRect;
+        let rootRect;
+        let tooltip;
+        let mockedTooltip;
+        let stub;
+
         beforeEach(() => {
+
+            elementRect = {
+                top: 30,
+                left: 10,
+                height: 100,
+                width: 100
+            };
+            rootRect = {
+                top: 200,
+                left: 0,
+                height: 0,
+                width: 0
+            };
+
             props = Object.assign({
                 isVisible: true,
                 tooltipDirection: 'top',
@@ -69,48 +83,34 @@ describe('Tooltip', () => {
                 onThresholdPassed: () => {},
                 getBounds: () => ({top:0, left: 0, right: 500, bottom: 500})
             }, props);
+
+            tooltip = new Tooltip(props);
+            mockedTooltip = sinon.mock(tooltip);
+
+            stub = sinon.stub(tooltip, 'setState', state => {
+                tooltip.state = Object.assign({}, tooltip.state, state);
+            });
+
+            mockedTooltip.expects('_getElementsPositions').returns({elementRect, rootRect});
         });
 
         it('should display on top if the tooltip fits on the screen', () => {
-            const tooltip = new Tooltip(props);
-            const stub = sinon.stub(tooltip, 'setState', state => {
-                tooltip.state = Object.assign({}, tooltip.state, state);
-            });
-            rootRect.top = 200;
-
-            tooltip._adjustPosition({
-                top: 30,
-                left: 10,
-                height: 100,
-                width: 100
-            }, rootRect);
+            tooltip._adjustPosition();
 
             expect(tooltip.state.moved).to.equal(true);
             expect(tooltip.state.tooltipDirection).to.equal('top');
             expect(tooltip.state.flippedFrom).to.equal(null);
-
-            stub.restore();
         });
 
         it('should flip from the top to the bottom if the tooltip passes the top threshold', () => {
-            const tooltip = new Tooltip(props);
-            const stub = sinon.stub(tooltip, 'setState', state => {
-                tooltip.state = Object.assign({}, tooltip.state, state);
-            });
-            rootRect.top = 20;
+            elementRect.top = 10;
+            rootRect.top = 20
 
-            tooltip._adjustPosition({
-                top: 10,
-                left: 10,
-                height: 100,
-                width: 100
-            }, rootRect);
+            tooltip._adjustPosition();
 
             expect(tooltip.state.moved).to.equal(false);
             expect(tooltip.state.tooltipDirection).to.equal('bottom');
             expect(tooltip.state.flippedFrom).to.equal('top');
-
-            stub.restore();
         });
 
     });

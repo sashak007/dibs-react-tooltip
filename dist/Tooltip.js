@@ -119,6 +119,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	
 	    _createClass(Tooltip, [{
+	        key: 'componentDidMount',
+	        value: function componentDidMount() {
+	            if (this.state.isVisible) {
+	                this._adjustPosition();
+	            }
+	        }
+	    }, {
 	        key: 'componentWillReceiveProps',
 	        value: function componentWillReceiveProps(nextProps) {
 	            this.setState({
@@ -130,12 +137,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        key: 'componentDidUpdate',
 	        value: function componentDidUpdate() {
 	            if (this.state.isVisible && !this.state.moved) {
-	                if (this._tooltip && this._tooltip.childNodes.length) {
-	                    // childNodes[0] is the contents of the tooltip, it's not present until the first time the component is shown so we can't do in componentDidMount
-	                    var rect = this._tooltip.childNodes[0].getBoundingClientRect();
-	                    var rootRect = this._tooltip.parentNode.getBoundingClientRect();
-	                    this._adjustPosition(rect, rootRect);
-	                }
+	                this._adjustPosition();
 	            } else if (!this.state.isVisible && this.state.moved) {
 	                // make sure the position gets adjusted next time the tooltip is opened
 	                this.setState({
@@ -192,6 +194,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	            return positions[tooltipDirection];
 	        }
+	    }, {
+	        key: '_getElementsPositions',
+	        value: function _getElementsPositions() {
+	            return {
+	                elementRect: this._tooltip.childNodes[0].getBoundingClientRect(),
+	                rootRect: this._tooltip.parentNode.getBoundingClientRect()
+	            };
+	        }
 	
 	        /**
 	         * Adjusts the position of the tooltip element so that it's centered if possible. If it can't be centered because
@@ -201,9 +211,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    }, {
 	        key: '_adjustPosition',
-	        value: function _adjustPosition(elementRect, rootRect) {
+	        value: function _adjustPosition() {
 	            var _this2 = this;
 	
+	            var _getElementsPositions2 = this._getElementsPositions();
+	
+	            var elementRect = _getElementsPositions2.elementRect;
+	            var rootRect = _getElementsPositions2.rootRect;
 	            var tooltipDirection = this.state.tooltipDirection;
 	            var thresholds = this.props.positionThresholds;
 	
@@ -360,7 +374,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                'svg',
 	                { className: triangleClassName, style: triangleStyle[direction], width: triangleSize * 2, height: triangleSize, viewBox: '0 0 20 10' },
 	                React.createElement('polygon', { points: '9.65217424 0 19.3043485 9.25000032 0 9.25000032' }),
-	                React.createElement('polygon', { className: styles.triangleStroke, 'stroke-linecap': 'square', points: '9.65723177 0.421508695 9.66228432 0.416666667 9.6572594 0.421535177 18.4448983 8.84302248 18.3478314 8.84165446 9.65723177 0.42156195 0.966632149 8.84165446 0.869565217 8.84302248 9.65720414 0.421535177 9.65217922 0.416666667' })
+	                React.createElement('polygon', { className: styles.triangleStroke, strokeLinecap: 'square', points: '9.65723177 0.421508695 9.66228432 0.416666667 9.6572594 0.421535177 18.4448983 8.84302248 18.3478314 8.84165446 9.65723177 0.42156195 0.966632149 8.84165446 0.869565217 8.84302248 9.65720414 0.421535177 9.65217922 0.416666667' })
 	            );
 	        }
 	
