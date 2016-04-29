@@ -104,13 +104,25 @@ describe('Tooltip', () => {
 
         it('should flip from the top to the bottom if the tooltip passes the top threshold', () => {
             elementRect.top = 10;
-            rootRect.top = 20
+            rootRect.top = 20;
 
             tooltip._adjustPosition();
 
             expect(tooltip.state.moved).to.equal(false);
             expect(tooltip.state.tooltipDirection).to.equal('bottom');
             expect(tooltip.state.flippedFrom).to.equal('top');
+        });
+
+        it('should flip from the left to the right if the tooltip passes the left threshold', () => {
+            elementRect.left = 10;
+            rootRect.left = 20;
+            tooltip.state.tooltipDirection = 'left';
+
+            tooltip._adjustPosition();
+
+            expect(tooltip.state.moved).to.equal(false);
+            expect(tooltip.state.tooltipDirection).to.equal('right');
+            expect(tooltip.state.flippedFrom).to.equal('left');
         });
 
     });

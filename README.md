@@ -29,6 +29,9 @@ containerClass: 		React.PropTypes.string,
 triangleClass:          React.PropTypes.string,
 closeClass: 			React.PropTypes.string,
 
+// Determines if debounce is needed for visibility animations
+debounce:               React.PropTypes.number,
+
 // The height of the triangle arrow of the tooltip
 triangleSize: 			React.PropTypes.number,
 
