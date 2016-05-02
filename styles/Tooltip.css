@@ -58,13 +58,13 @@
 }
 
 :local(.top .triangle) {
-    transform: rotate(180deg);
+    transform: rotate(180deg) translateZ(0);
 }
 
 :local(.left .triangle) {
-    transform: rotate(90deg);
+    transform: rotate(90deg) translateZ(0);
 }
 
 :local(.right .triangle) {
-    transform: rotate(-90deg);
+    transform: rotate(-90deg) translateZ(0);
 }

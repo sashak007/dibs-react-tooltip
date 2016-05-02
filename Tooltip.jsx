@@ -4,6 +4,7 @@
 
 const React = require('react');
 const classNames = require('classnames');
+const lodashDebounce = require('lodash.debounce');
 const styles = require('./styles/Tooltip.css');
 
 const oppositeDirections = {
@@ -54,16 +55,28 @@ class Tooltip extends React.Component {
     }
 
     componentWillReceiveProps(nextProps) {
+        if (!this.props.isVisible && nextProps.isVisible) {
+            this.setState({
+                tooltipDirection: nextProps.tooltipDirection || this.state.tooltipDirection
+            });
+        }
+
         this.setState({
-            tooltipDirection: nextProps.tooltipDirection || this.state.tooltipDirection,
             isVisible: nextProps.isVisible
         });
     }
 
     componentDidUpdate() {
-        if (this.state.isVisible && !this.state.moved) {
+        const { isVisible, moved } = this.state;
+        const { debounce } = this.props;
+        const adjustPositionDebounced = lodashDebounce(this._adjustPosition, debounce).bind(this);
+        const shouldAdjust = isVisible && !moved;
+
+        if (shouldAdjust && debounce) {
+            adjustPositionDebounced();
+        } else if (shouldAdjust) {
             this._adjustPosition();
-        } else if (!this.state.isVisible && this.state.moved) {
+        } else if (!isVisible && moved) {
             // make sure the position gets adjusted next time the tooltip is opened
             this.setState({
                 moved: false,
@@ -129,21 +142,30 @@ class Tooltip extends React.Component {
      * @param  {Object} elementRect A rectangle indicating the dimensions of the tooltip element
      */
     _adjustPosition() {
+        if (!this.state.isVisible) {
+            return;
+        }
+
         const { elementRect, rootRect } = this._getElementsPositions();
         const { tooltipDirection } = this.state;
-        const { positionThresholds: thresholds } = this.props;
+        const { positionThresholds: thresholds, triangleSize } = this.props;
         const position = this._getInitialTooltipPosition(elementRect, tooltipDirection, rootRect);
 
         // determine the area against which we are going to check the thresholds
         const bounds = this.props.getBounds();
+        const overflowTop = rootRect.top - Math.abs(position.top) - bounds.top;
+        const overflowBottom = bounds.bottom - (rootRect.top + Math.abs(position.top) + elementRect.height);
+        const overflowLeft = (rootRect.left + position.left) - bounds.left;
+        const overflowRight = bounds.right - (rootRect.left + (position.left + elementRect.width));
+
         const determineThresholds = {
-            top: () => rootRect.top - Math.abs(position.top) - bounds.top,
-            bottom: () => bounds.bottom - (rootRect.top + Math.abs(position.top) + elementRect.height)
+            top: () => overflowTop,
+            bottom: () => overflowBottom,
+            left: () => overflowLeft,
+            right: () => overflowRight
         };
 
         const adjustHorizontal = () => {
-            const overflowLeft = (rootRect.left + position.left) - bounds.left;
-            const overflowRight = bounds.right - (rootRect.left + (position.left + elementRect.width));
             const thresholdsLeft = overflowLeft - thresholds.left;
             const thresholdsRight = overflowRight - thresholds.right;
 
@@ -160,8 +182,33 @@ class Tooltip extends React.Component {
             }
         };
 
+        const adjustVertical = () => {
+            const thresholdsTop = overflowTop - thresholds.top;
+            const thresholdsBottom = overflowBottom + elementRect.height / 2;
+            const triangleHalfSize = triangleSize / 2;
+            const overflowTriangleTop = elementRect.height - triangleHalfSize - triangleSize;
+
+            if (overflowTop < thresholds.top) {
+                position.top -= thresholdsTop;
+                position.triangleTop += thresholdsTop;
+                this.props.onThresholdPassed();
+            }
+
+            if (thresholdsBottom < thresholds.bottom) {
+                position.top += thresholdsBottom + thresholds.bottom;
+                position.triangleTop -= thresholdsBottom + thresholds.bottom;
+                this.props.onThresholdPassed();
+            }
+
+            if (position.triangleTop <= 0) {
+                position.triangleTop = triangleHalfSize;
+            } else if (position.triangleTop > overflowTriangleTop) {
+                position.triangleTop = overflowTriangleTop;
+            }
+        };
+
         const changeDirection = direction => {
-            const oldState = this.state.tooltipDirection;
+            const oldState = tooltipDirection;
             this.setState({
                 tooltipDirection: direction,
                 moved: false,
@@ -191,6 +238,7 @@ class Tooltip extends React.Component {
         };
 
         const verticalOrientations = ['top', 'bottom'];
+        const horizontalOrientations = ['left', 'right'];
 
         /*
             If the tooltip is displayed on the top or bottom, adjust the horizontal position so it's all displayed inside
@@ -199,6 +247,16 @@ class Tooltip extends React.Component {
         if (verticalOrientations.indexOf(tooltipDirection) >= 0) {
             adjustHorizontal();
             if (verticalOrientations.reduce(changeDirectionIfNecessary, false)) {
+                return;
+            }
+        }
+
+        /*
+            If the tooltip is displayed on the left or right flip it from left->right or vice-versa if necessary
+         */
+        if (horizontalOrientations.indexOf(tooltipDirection) >= 0) {
+            adjustVertical();
+            if (horizontalOrientations.reduce(changeDirectionIfNecessary, false)) {
                 return;
             }
         }
@@ -306,6 +364,7 @@ Tooltip.propTypes = {
     triangleClass: React.PropTypes.string,
     closeClass: React.PropTypes.string,
 
+    debounce: React.PropTypes.number,
     triangleSize: React.PropTypes.number,
     positionThresholds: React.PropTypes.shape({
         top: React.PropTypes.number,
@@ -324,6 +383,7 @@ Tooltip.defaultProps = {
     className: '',
     containerClass: styles.defaultStyle,
     triangleClass: styles.defaultTriangle,
+    debounce: 0,
     triangleSize: 10,
     tooltipDirection: 'top',
     positionThresholds: {
