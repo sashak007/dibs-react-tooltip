@@ -97,6 +97,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (element.height && type === 'height') {
 	            return element.height / 2;
 	        }
+	        return 0;
 	    };
 	}
 	
