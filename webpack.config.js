@@ -7,14 +7,14 @@ var ExtractTextPlugin = require('extract-text-webpack-plugin');
 module.exports = {
     entry: './Tooltip.jsx',
     output: {
-        libraryTarget: 'umd',
+        libraryTarget: 'commonjs2',
         path: path.resolve(__dirname, './dist'),
         filename: 'Tooltip.js'
     },
-    externals: [
-        'react',
-        'classnames'
-    ],
+    externals: {
+        'react': 'react',
+        'lodash.debounce': 'lodash.debounce'
+    },
     module: {
         loaders: [
             {test: /\.jsx$/, loader: 'babel-loader', query: {plugins: ['transform-object-assign']}},
