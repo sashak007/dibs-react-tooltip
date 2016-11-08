@@ -2,6 +2,7 @@
 
 var path = require('path');
 var autoprefixer = require('autoprefixer');
+var ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 module.exports = {
     entry: './Tooltip.jsx',
@@ -17,11 +18,14 @@ module.exports = {
     module: {
         loaders: [
             {test: /\.jsx$/, loader: 'babel-loader', query: {plugins: ['transform-object-assign']}},
-            {test: /\.css$/, loader: 'style!css?localIdentName=[name]__[local]___[hash:base64:5]!postcss'}
+            {test: /\.css$/, loader: ExtractTextPlugin.extract('css?localIdentName=[name]__[local]___[hash:base64:5]!postcss')}
         ]
     },
     postcss: [
         autoprefixer({autoprefixer: undefined})
     ],
-    devtool: 'source-map'
+    devtool: 'source-map',
+    plugins: [
+        new ExtractTextPlugin('[name].css')
+    ]
 };

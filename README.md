@@ -1,7 +1,7 @@
 Usage:
 ```
 const Tooltip = require('dibs-react-tooltip');
-
+require('dibs-react-tooltip/dist/main.css'); // to include default styles
 
 render() {
 	return (
