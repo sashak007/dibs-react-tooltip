@@ -224,7 +224,7 @@ class Tooltip extends React.Component {
          */
         const canFlip = () => {
             // if the previous tooltip direction was 'top' (i.e. it's on the bottom now), we can still flip back to the top
-            return !this.state.flippedFrom || this.state.flippedFrom === 'top';
+            return !this.props.lockDirection && (!this.state.flippedFrom || this.state.flippedFrom === 'top');
         };
 
         const changeDirectionIfNecessary = (changed, direction) => {
@@ -355,6 +355,7 @@ class Tooltip extends React.Component {
 Tooltip.propTypes = {
     children: React.PropTypes.node,
     tooltipDirection: React.PropTypes.oneOf(['top', 'bottom', 'left', 'right']),
+    lockDirection: React.PropTypes.bool,
 
     isVisible: React.PropTypes.bool,
     hasTriangle: React.PropTypes.bool,
@@ -387,6 +388,7 @@ Tooltip.defaultProps = {
     debounce: 0,
     triangleSize: 10,
     tooltipDirection: 'top',
+    lockDirection: false,
     positionThresholds: {
         top: 10,
         bottom: 10,
