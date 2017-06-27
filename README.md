@@ -16,13 +16,15 @@ Props:
 ```
 // Determines the initial position of the tooltip relative to rootPosition
 tooltipDirection: 		React.PropTypes.oneOf(['top', 'bottom', 'left', 'right']),	// TODO: adjust position if the tooltip doesn't fit when left/right is used
+lockDirection:                  React.PropTypes.bool,
 
 // Whether to render the tooltip
 isVisible: 				React.PropTypes.bool,
 
-// Whether to show triangle, close
+// Whether to show triangle, close, shadow
 hasTriangle:            React.PropTypes.bool,
 hasClose:               React.PropTypes.bool,
+hasShadow:              React.PropTypes.bool,
 
 // These can be used to override the default local styles
 containerClass: 		React.PropTypes.string,

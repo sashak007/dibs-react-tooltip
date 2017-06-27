@@ -295,8 +295,10 @@ class Tooltip extends React.Component {
     _renderContents(containerStyle) {
         const { className, children, hasTriangle, hasClose, containerClass, onClick } = this.props;
         const { tooltipDirection } = this.state;
-        const tooltipClass = classNames(styles[tooltipDirection], styles.container, className);
         const tooltipInnerClass = classNames(styles.inner, containerClass);
+        const tooltipClass = classNames(styles[tooltipDirection], styles.container, className, {
+            [styles.shadow]: this.props.hasShadow
+        });
 
         return (
             <div className={tooltipClass} style={containerStyle} onClick={onClick}>
@@ -312,11 +314,14 @@ class Tooltip extends React.Component {
     /**
      * Renders the tooltip triangle if this.props.hasTriangle is true
      */
-    _renderTriangle(direction) {
+    _renderTriangle(tooltipDirection) {
         const { triangleSize, triangleClass } = this.props;
         const { triangleLeft: left, triangleTop: top } = this.state;
-        const triangleClassName = classNames(styles.triangle, triangleClass);
         const triangleDirectionPosition = -1 * triangleSize;
+        const addShadow = this.props.hasShadow && tooltipDirection == 'top';
+        const triangleClassName = classNames(styles.triangle, triangleClass, {
+            [styles.triangleShadow]: addShadow
+        });
 
         const triangleStyle = {
             top: {
@@ -338,7 +343,7 @@ class Tooltip extends React.Component {
         };
 
         return (
-            <svg className={triangleClassName} style={triangleStyle[direction]} width={triangleSize * 2} height={triangleSize} viewBox="0 0 20 10">
+            <svg className={triangleClassName} style={triangleStyle[tooltipDirection]} width={triangleSize * 2} height={triangleSize} viewBox="0 0 20 10">
                 <polygon points="9.65217424 0 19.3043485 9.25000032 0 9.25000032"></polygon>
                 <polygon className={styles.triangleStroke} strokeLinecap="square" points="9.65723177 0.421508695 9.66228432 0.416666667 9.6572594 0.421535177 18.4448983 8.84302248 18.3478314 8.84165446 9.65723177 0.42156195 0.966632149 8.84165446 0.869565217 8.84302248 9.65720414 0.421535177 9.65217922 0.416666667"></polygon>
             </svg>
@@ -381,6 +386,7 @@ Tooltip.propTypes = {
     isVisible: React.PropTypes.bool,
     hasTriangle: React.PropTypes.bool,
     hasClose: React.PropTypes.bool,
+    hasShadow: React.PropTypes.bool,
     closeOnOutsideClick: React.PropTypes.bool,
 
     className: React.PropTypes.string,
@@ -423,6 +429,7 @@ Tooltip.defaultProps = {
     getBounds: getWindowBounds,
     hasTriangle: true,
     hasClose: false,
+    hasShadow: false,
     closeOnOutsideClick: false,
 };
 

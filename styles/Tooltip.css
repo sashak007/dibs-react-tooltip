@@ -68,3 +68,13 @@
 :local(.right .triangle) {
     transform: rotate(-90deg) translateZ(0);
 }
+
+:local(.shadow) {
+    box-shadow: 1px 5px 5px 0 rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+:local(.triangleShadow) {
+    -webkit-filter: drop-shadow( -1px -5px 2px #bbb );
+    filter: drop-shadow( -1px -5px 2px #bbb );
+}
