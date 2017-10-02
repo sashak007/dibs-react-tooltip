@@ -3,6 +3,7 @@
 'use strict';
 
 const React = require('react');
+const PropTypes = require('prop-types');
 const classNames = require('classnames');
 const lodashDebounce = require('lodash.debounce');
 const styles = require('./styles/Tooltip.css');
@@ -379,34 +380,34 @@ class Tooltip extends React.Component {
 }
 
 Tooltip.propTypes = {
-    children: React.PropTypes.node,
-    tooltipDirection: React.PropTypes.oneOf(['top', 'bottom', 'left', 'right']),
-    lockDirection: React.PropTypes.bool,
+    children: PropTypes.node,
+    tooltipDirection: PropTypes.oneOf(['top', 'bottom', 'left', 'right']),
+    lockDirection: PropTypes.bool,
 
-    isVisible: React.PropTypes.bool,
-    hasTriangle: React.PropTypes.bool,
-    hasClose: React.PropTypes.bool,
-    hasShadow: React.PropTypes.bool,
-    closeOnOutsideClick: React.PropTypes.bool,
+    isVisible: PropTypes.bool,
+    hasTriangle: PropTypes.bool,
+    hasClose: PropTypes.bool,
+    hasShadow: PropTypes.bool,
+    closeOnOutsideClick: PropTypes.bool,
 
-    className: React.PropTypes.string,
-    containerClass: React.PropTypes.string,
-    triangleClass: React.PropTypes.string,
-    closeClass: React.PropTypes.string,
+    className: PropTypes.string,
+    containerClass: PropTypes.string,
+    triangleClass: PropTypes.string,
+    closeClass: PropTypes.string,
 
-    debounce: React.PropTypes.number,
-    triangleSize: React.PropTypes.number,
-    positionThresholds: React.PropTypes.shape({
-        top: React.PropTypes.number,
-        bottom: React.PropTypes.number,
-        left: React.PropTypes.number,
-        right: React.PropTypes.number
+    debounce: PropTypes.number,
+    triangleSize: PropTypes.number,
+    positionThresholds: PropTypes.shape({
+        top: PropTypes.number,
+        bottom: PropTypes.number,
+        left: PropTypes.number,
+        right: PropTypes.number
     }),
 
-    onClick: React.PropTypes.func,
-    onCloseClick: React.PropTypes.func,
-    onThresholdPassed: React.PropTypes.func,
-    getBounds: React.PropTypes.func
+    onClick: PropTypes.func,
+    onCloseClick: PropTypes.func,
+    onThresholdPassed: PropTypes.func,
+    getBounds: PropTypes.func
 };
 
 Tooltip.defaultProps = {

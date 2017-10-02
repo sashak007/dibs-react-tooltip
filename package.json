@@ -44,10 +44,11 @@
   },
   "peerDependencies": {
     "lodash.debounce": "^4.0.8",
-    "react": "^15.0.0",
-    "react-dom": "^15.6.1"
+    "react": "^15.0.0 || ^16.0.0",
+    "react-dom": "^15.0.0 || ^16.0.0"
   },
   "dependencies": {
-    "classnames": "^2.2.5"
+    "classnames": "^2.2.5",
+    "prop-types": "^15.5.7"
   }
 }
