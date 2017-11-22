@@ -1,6 +1,6 @@
 {
   "name": "dibs-react-tooltip",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "1stdibs React tooltip component",
   "main": "index.js",
   "scripts": {
