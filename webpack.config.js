@@ -11,10 +11,10 @@ module.exports = {
         path: path.resolve(__dirname, './dist'),
         filename: 'Tooltip.js'
     },
-    externals: {
-        'react': 'react',
-        'lodash.debounce': 'lodash.debounce'
-    },
+    externals: [
+        // Externalize any `require` not from our source
+        (context, request, callback) => callback(null, /^[a-z0-9]/i.test(request) ? 'commonjs ' + request : false)
+    ],
     module: {
         loaders: [
             {test: /\.jsx$/, loader: 'babel-loader', query: {plugins: ['transform-object-assign']}},
