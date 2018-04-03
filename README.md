@@ -37,6 +37,9 @@ debounce:               PropTypes.number,
 // The height of the triangle arrow of the tooltip
 triangleSize: 			PropTypes.number,
 
+// Unique selector for the MG automated tests
+dataTn: 				PropTypes.string,
+
 // Determines at what point the tooltip will flip to the opposite direction
 // 		For example, if tooltipDirection=top and positionThresholds.top=60, the direction
 //		will become bottom once the top of the tooltip is less than 60px from the top of

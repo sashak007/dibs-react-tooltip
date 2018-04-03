@@ -294,7 +294,7 @@ class Tooltip extends React.Component {
      * @param  {Object} style         The style of the tooltip container
      */
     _renderContents(containerStyle) {
-        const { className, children, hasTriangle, hasClose, containerClass, onClick } = this.props;
+        const { className, children, hasTriangle, hasClose, containerClass, onClick, dataTn } = this.props;
         const { tooltipDirection } = this.state;
         const tooltipInnerClass = classNames(styles.inner, containerClass);
         const tooltipClass = classNames(styles[tooltipDirection], styles.container, className, {
@@ -302,7 +302,7 @@ class Tooltip extends React.Component {
         });
 
         return (
-            <div className={tooltipClass} style={containerStyle} onClick={onClick}>
+            <div className={tooltipClass} style={containerStyle} onClick={onClick} data-tn={dataTn}>
                 <div className={tooltipInnerClass}>
                     {children}
                 </div>
@@ -407,7 +407,8 @@ Tooltip.propTypes = {
     onClick: PropTypes.func,
     onCloseClick: PropTypes.func,
     onThresholdPassed: PropTypes.func,
-    getBounds: PropTypes.func
+    getBounds: PropTypes.func,
+    dataTn: PropTypes.string
 };
 
 Tooltip.defaultProps = {
@@ -432,6 +433,7 @@ Tooltip.defaultProps = {
     hasClose: false,
     hasShadow: false,
     closeOnOutsideClick: false,
+    dataTn: 'tooltip'
 };
 
 module.exports = Tooltip;
